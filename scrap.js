@@ -11,24 +11,23 @@ objCandidatoBE.objUsuarioBE = new Object();
 
 var strMsgHastaActualidad = 'Hasta la actualidad';
 
-var imprimeDato = function imprime_dato(tipo,cadena)
-{
-    lista_datos[tipo] = cadena;
-};
 
-var lista_datos = {};
+
+
 
 // document ready
-(function () {
+var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
+    var lista_datos = {};
 
-    //c = candidato
-    //p= proceso electoral
-    //op = código de organización política
+    var imprimeDato = function imprime_dato(tipo,cadena)
+    {
+        lista_datos[tipo] = cadena;
+    };
 
+    idCandidato = idCandidato.toString();
+    idProceso = idProceso.toString();
+    idOrgPolitica = idOrgPolitica.toString();
 
-    var idCandidato = getUrlVars()["c"];
-    var idProceso = getUrlVars()["p"];
-    var idOrgPolitica = getUrlVars()["op"];
     var objPerfilUsuarioBEnew = new Object();
 
     //candidato
@@ -155,15 +154,15 @@ var lista_datos = {};
 
                             $.each(jsondata.d, function (i, item) {
                                 switch (item.objTipoBE.intTipo) {
-                                    case 1:
-                                        imprimeDato("txtPadre",item.strNombres.toUpperCase())
-                                        break;
-                                    case 2:
-                                        imprimeDato("txtMadre",item.strNombres.toUpperCase())
-                                        break;
-                                    case 3:
-                                        imprimeDato("txtConyuge",item.strNombres.toUpperCase())
-                                        break;
+                                case 1:
+                                    imprimeDato("txtPadre",item.strNombres.toUpperCase())
+                                    break;
+                                case 2:
+                                    imprimeDato("txtMadre",item.strNombres.toUpperCase())
+                                    break;
+                                case 3:
+                                    imprimeDato("txtConyuge",item.strNombres.toUpperCase())
+                                    break;
                                 }
                             });
                         }
@@ -256,90 +255,90 @@ var lista_datos = {};
                                 var _concluidoSecText = '';
 
                                 switch (item.intTipoEducacion) {
-                                    case 1: //primaria                                       
+                                case 1: //primaria                                       
 
-                                        switch (item.strPrimaria * 1) {
-                                            case 0:
-                                                _concluidoPriText = 'No concluido';
-                                                break;
-                                            case 1:
-                                                _concluidoPriText = 'Concluido';
-                                                break;
-                                            case 2:
-                                                _concluidoPriText = 'No cuenta con estudios';
-                                                break;
-                                        }
-
-
-                                        str += '<tr>';
-                                        str += '<th style="width:20%" >Institución Educativa</th>';
-                                        str += '<td style="width:30%">' + item.strCentroPrimaria + '</td>';
-                                        str += '<th style="width:20%">Lugar</th>';
-                                        if (item.strFgExtranjero == "1") {
-                                            str += '<td style="width:30%">' + item.strPais + '</td>';
-                                        } else {
-                                            str += '<td style="width:30%">PERÚ - ' + item.objUbigeoPrimaria.strDepartamento + ' - ' + item.objUbigeoPrimaria.strProvincia + ' - ' + item.objUbigeoPrimaria.strDistrito + '</td>';
-                                        }
-                                        str += '</tr>';
-                                        str += '<tr>';
-                                        str += '<th>Concluido</th>';
-                                        str += '<td>' + _concluidoPriText + '</td>';
-                                        str += '<th>Período</th>';
-                                        str += '<td>' + item.intAnioInicioPrimaria + ' - ' + (item.intAnioFinPrimaria == 0 ? strMsgHastaActualidad : item.intAnioFinPrimaria) + '</td>';
-
-                                        itemcountPri += 1;
-
-
-                                        if (jsondata.d.length > itemcountPri) {
-                                            str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-                                        }
-
-                                        $('#tblEducacionPrimaria').show();
-                                        $('#tblEducacionPrimaria').append(str);
-                                        str = '';
-
+                                    switch (item.strPrimaria * 1) {
+                                    case 0:
+                                        _concluidoPriText = 'No concluido';
                                         break;
-
-                                    case 2: //secundaria                                      
-
-                                        switch (item.strSecundaria * 1) {
-                                            case 0:
-                                                _concluidoSecText = 'No concluido';
-                                                break;
-                                            case 1:
-                                                _concluidoSecText = 'Concluido';
-                                                break;
-                                            case 2:
-                                                _concluidoSecText = 'No cuenta con estudios';
-                                                break;
-                                        }
-
-                                        str += '<tr>';
-                                        str += '<th style="width:20%" >Institución Educativa</th>';
-                                        str += '<td style="width:30%">' + item.strCentroSecundaria + '</td>';
-                                        str += '<th style="width:20%">Lugar</th>';
-                                        if (item.strFgExtranjero == "1") {
-                                            str += '<td style="width:30%">' + item.strPais + '</td>';
-                                        } else {
-                                            str += '<td style="width:30%">PERÚ - ' + item.objUbigeoSecundaria.strDepartamento + ' - ' + item.objUbigeoSecundaria.strProvincia + ' - ' + item.objUbigeoSecundaria.strDistrito + '</td>';
-                                        }
-                                        str += '</tr>';
-                                        str += '<tr>';
-                                        str += '<th>Concluido</th>';
-                                        str += '<td>' + _concluidoSecText + '</td>';
-                                        str += '<th>Período</th>';
-                                        str += '<td>' + item.intAnioInicioSecundaria + ' - ' + (item.intAnioFinSecundaria == 0 ? strMsgHastaActualidad : item.intAnioFinSecundaria) + '</td>';
-
-                                        itemcountSec += 1;
-
-                                        if (jsondata.d.length > itemcountSec) {
-                                            str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-                                        }
-
-                                        $('#tblEducacionSecundaria').show();
-                                        $('#tblEducacionSecundaria').append(str);
-                                        str = '';
+                                    case 1:
+                                        _concluidoPriText = 'Concluido';
                                         break;
+                                    case 2:
+                                        _concluidoPriText = 'No cuenta con estudios';
+                                        break;
+                                    }
+
+
+                                    str += '<tr>';
+                                    str += '<th style="width:20%" >Institución Educativa</th>';
+                                    str += '<td style="width:30%">' + item.strCentroPrimaria + '</td>';
+                                    str += '<th style="width:20%">Lugar</th>';
+                                    if (item.strFgExtranjero == "1") {
+                                        str += '<td style="width:30%">' + item.strPais + '</td>';
+                                    } else {
+                                        str += '<td style="width:30%">PERÚ - ' + item.objUbigeoPrimaria.strDepartamento + ' - ' + item.objUbigeoPrimaria.strProvincia + ' - ' + item.objUbigeoPrimaria.strDistrito + '</td>';
+                                    }
+                                    str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Concluido</th>';
+                                    str += '<td>' + _concluidoPriText + '</td>';
+                                    str += '<th>Período</th>';
+                                    str += '<td>' + item.intAnioInicioPrimaria + ' - ' + (item.intAnioFinPrimaria == 0 ? strMsgHastaActualidad : item.intAnioFinPrimaria) + '</td>';
+
+                                    itemcountPri += 1;
+
+
+                                    if (jsondata.d.length > itemcountPri) {
+                                        str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
+                                    }
+
+                                    $('#tblEducacionPrimaria').show();
+                                    $('#tblEducacionPrimaria').append(str);
+                                    str = '';
+
+                                    break;
+
+                                case 2: //secundaria                                      
+
+                                    switch (item.strSecundaria * 1) {
+                                    case 0:
+                                        _concluidoSecText = 'No concluido';
+                                        break;
+                                    case 1:
+                                        _concluidoSecText = 'Concluido';
+                                        break;
+                                    case 2:
+                                        _concluidoSecText = 'No cuenta con estudios';
+                                        break;
+                                    }
+
+                                    str += '<tr>';
+                                    str += '<th style="width:20%" >Institución Educativa</th>';
+                                    str += '<td style="width:30%">' + item.strCentroSecundaria + '</td>';
+                                    str += '<th style="width:20%">Lugar</th>';
+                                    if (item.strFgExtranjero == "1") {
+                                        str += '<td style="width:30%">' + item.strPais + '</td>';
+                                    } else {
+                                        str += '<td style="width:30%">PERÚ - ' + item.objUbigeoSecundaria.strDepartamento + ' - ' + item.objUbigeoSecundaria.strProvincia + ' - ' + item.objUbigeoSecundaria.strDistrito + '</td>';
+                                    }
+                                    str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Concluido</th>';
+                                    str += '<td>' + _concluidoSecText + '</td>';
+                                    str += '<th>Período</th>';
+                                    str += '<td>' + item.intAnioInicioSecundaria + ' - ' + (item.intAnioFinSecundaria == 0 ? strMsgHastaActualidad : item.intAnioFinSecundaria) + '</td>';
+
+                                    itemcountSec += 1;
+
+                                    if (jsondata.d.length > itemcountSec) {
+                                        str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
+                                    }
+
+                                    $('#tblEducacionSecundaria').show();
+                                    $('#tblEducacionSecundaria').append(str);
+                                    str = '';
+                                    break;
 
                                 }
 
@@ -382,150 +381,150 @@ var lista_datos = {};
                                 var dis = item.objUbigeoBE.strUbigeo.substring(4, 6);
 
                                 switch (item.objTipoEstudioBE.intTipo) {
-                                    case 1:
-                                        //tecnico
-                                        itemcountTec += 1;
+                                case 1:
+                                    //tecnico
+                                    itemcountTec += 1;
 
-                                        str += '<tr>';
-                                        str += '<th>Nombre del centro de estudios</th>'
-                                        str += '<td>' + item.strNombreCentro + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Nombre del centro de estudios</th>'
+                                    str += '<td>' + item.strNombreCentro + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Lugar</th>'
-                                        if (item.strFgExtranjero == 1) {
-                                            str += '<td>' + item.strPais + '</td>';
-                                        } else {
-                                            str += '<td>' + item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito + '</td>';
-                                        }
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Lugar</th>'
+                                    if (item.strFgExtranjero == 1) {
+                                        str += '<td>' + item.strPais + '</td>';
+                                    } else {
+                                        str += '<td>' + item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito + '</td>';
+                                    }
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Especialidad</th>'
-                                        str += '<td>' + item.strNombreEstudio + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Especialidad</th>'
+                                    str += '<td>' + item.strNombreEstudio + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Curso</th>'
-                                        str += '<td>' + item.strNombreCarrera + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Curso</th>'
+                                    str += '<td>' + item.strNombreCarrera + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Estado</th>'
-                                        str += '<td>' + (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido') + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Estado</th>'
+                                    str += '<td>' + (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido') + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Periodo</th>'
-                                        str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>'
-                                        str += '</tr>';
-                                        str += '<tr><td colspan="2" class="separatorItem">&nbsp;</td></tr>';
+                                    str += '<tr>';
+                                    str += '<th>Periodo</th>'
+                                    str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>'
+                                    str += '</tr>';
+                                    str += '<tr><td colspan="2" class="separatorItem">&nbsp;</td></tr>';
 
-                                        $('#tblTecnico').append(str);
-                                        $('#tblTecnico').show();
+                                    $('#tblTecnico').append(str);
+                                    $('#tblTecnico').show();
 
-                                        break;
-                                    case 3:
-                                        //universitario
-                                        itemcountUni += 1;
-                                        str += '<tr>';
-                                        str += '<th>Nombre de la universidad</th>'
-                                        str += '<td>' + item.strNombreCentro + '</td>'
-                                        str += '</tr>';
+                                    break;
+                                case 3:
+                                    //universitario
+                                    itemcountUni += 1;
+                                    str += '<tr>';
+                                    str += '<th>Nombre de la universidad</th>'
+                                    str += '<td>' + item.strNombreCentro + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Lugar</th>'
-                                        if (item.strFgExtranjero == 1) {
-                                            str += '<td>' + item.strPais + '</td>';
-                                        } else {
-                                            str += '<td>' + item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito + '</td>';
-                                        }
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Lugar</th>'
+                                    if (item.strFgExtranjero == 1) {
+                                        str += '<td>' + item.strPais + '</td>';
+                                    } else {
+                                        str += '<td>' + item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito + '</td>';
+                                    }
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Nombre de la facultad</th>'
-                                        str += '<td>' + item.strNombreEstudio + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Nombre de la facultad</th>'
+                                    str += '<td>' + item.strNombreEstudio + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Carrera</th>'
-                                        str += '<td>' + item.strNombreCarrera + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Carrera</th>'
+                                    str += '<td>' + item.strNombreCarrera + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Estado</th>'
-                                        str += '<td>' + (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido') + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Estado</th>'
+                                    str += '<td>' + (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido') + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Grado / Título</th>'
-                                        str += '<td>' + item.strTipoGrado + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Grado / Título</th>'
+                                    str += '<td>' + item.strTipoGrado + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Periodo</th>'
-                                        str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>'
-                                        str += '</tr>';
-                                        str += '<tr><td colspan="2" class="separatorItem">&nbsp;</td></tr>';
+                                    str += '<tr>';
+                                    str += '<th>Periodo</th>'
+                                    str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>'
+                                    str += '</tr>';
+                                    str += '<tr><td colspan="2" class="separatorItem">&nbsp;</td></tr>';
 
-                                        $('#tblUniversitario').append(str);
-                                        $('#tblUniversitario').show();
+                                    $('#tblUniversitario').append(str);
+                                    $('#tblUniversitario').show();
 
-                                        break;
-                                    case 4:
-                                        //postgrado
-                                        itemcountPos += 1;
+                                    break;
+                                case 4:
+                                    //postgrado
+                                    itemcountPos += 1;
 
-                                        str += '<tr>';
-                                        str += '<th>Tipo</th>'
+                                    str += '<tr>';
+                                    str += '<th>Tipo</th>'
 
-                                        if (item.intTipoPostgrado == 1) {
-                                            str += '<td>Maestria</td>';
-                                        } else if (item.intTipoPostgrado == 2) {
-                                            str += '<td>Doctorado</td>';
-                                        } else if (item.intTipoPostgrado == 3) {
-                                            str += '<td>' + item.strOtroTipoDocumento + '</td>';
-                                        }
-                                        str += '</tr>';
+                                    if (item.intTipoPostgrado == 1) {
+                                        str += '<td>Maestria</td>';
+                                    } else if (item.intTipoPostgrado == 2) {
+                                        str += '<td>Doctorado</td>';
+                                    } else if (item.intTipoPostgrado == 3) {
+                                        str += '<td>' + item.strOtroTipoDocumento + '</td>';
+                                    }
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Nombre del centro de estudios</th>'
-                                        str += '<td>' + item.strNombreCentro + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Nombre del centro de estudios</th>'
+                                    str += '<td>' + item.strNombreCentro + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Lugar:</th>'
-                                        if (item.strFgExtranjero == 1) {
-                                            str += '<td>' + item.strPais + '</td>';
-                                        } else {
-                                            str += '<td>' + item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito + '</td>';
-                                        }
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Lugar:</th>'
+                                    if (item.strFgExtranjero == 1) {
+                                        str += '<td>' + item.strPais + '</td>';
+                                    } else {
+                                        str += '<td>' + item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito + '</td>';
+                                    }
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Especialidad</th>'
-                                        str += '<td>' + item.strNombreEstudio + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Especialidad</th>'
+                                    str += '<td>' + item.strNombreEstudio + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Estado</th>'
-                                        str += '<td>' + (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido') + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Estado</th>'
+                                    str += '<td>' + (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido') + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Grado/Titulo</th>'
-                                        str += '<td>' + item.strTipoGrado + '</td>'
-                                        str += '</tr>';
+                                    str += '<tr>';
+                                    str += '<th>Grado/Titulo</th>'
+                                    str += '<td>' + item.strTipoGrado + '</td>'
+                                    str += '</tr>';
 
-                                        str += '<tr>';
-                                        str += '<th>Periodo</th>'
-                                        str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>'
-                                        str += '</tr>';
-                                        str += '<tr><td colspan="2" class="separatorItem">&nbsp;</td></tr>';
+                                    str += '<tr>';
+                                    str += '<th>Periodo</th>'
+                                    str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>'
+                                    str += '</tr>';
+                                    str += '<tr><td colspan="2" class="separatorItem">&nbsp;</td></tr>';
 
-                                        $('#tblPostgrado').append(str);
-                                        $('#tblPostgrado').show();
-                                        break;
+                                    $('#tblPostgrado').append(str);
+                                    $('#tblPostgrado').show();
+                                    break;
                                 }
 
                             });
@@ -886,62 +885,62 @@ var lista_datos = {};
                                     var str = '';
 
                                     switch (item.intId_Bien) {
-                                        case 1:
+                                    case 1:
 
-                                            //inmuebles
-                                            str += '<tr>';
-                                            str += '<th>Tipo de bien</th>';
-                                            str += '<td>' + item.strNombre_Bien + '</td>';
-                                            str += '<th>Dirección</th>';
-                                            str += '<td>' + item.strDescripcion_Bien + '</td>';
-                                            str += '</tr>';
+                                        //inmuebles
+                                        str += '<tr>';
+                                        str += '<th>Tipo de bien</th>';
+                                        str += '<td>' + item.strNombre_Bien + '</td>';
+                                        str += '<th>Dirección</th>';
+                                        str += '<td>' + item.strDescripcion_Bien + '</td>';
+                                        str += '</tr>';
 
-                                            str += '<tr>';
-                                            str += '<th>N° Ficha - Reg. público</th>';
-                                            str += '<td>' + item.strCaracteristicas_Bien + '</td>';
-                                            str += '<th>Valor autovaluo S/.</th>';
-                                            str += '<td>' + formatNumber(item.floValor_Bien, 2) + '</td>';
-                                            str += '</tr>';
+                                        str += '<tr>';
+                                        str += '<th>N° Ficha - Reg. público</th>';
+                                        str += '<td>' + item.strCaracteristicas_Bien + '</td>';
+                                        str += '<th>Valor autovaluo S/.</th>';
+                                        str += '<td>' + formatNumber(item.floValor_Bien, 2) + '</td>';
+                                        str += '</tr>';
 
-                                            str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
+                                        str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
 
-                                            $('#tblCandidatoInmueble').append(str);
-                                            $('#tblCandidatoInmueble').show();
+                                        $('#tblCandidatoInmueble').append(str);
+                                        $('#tblCandidatoInmueble').show();
 
-                                            break;
-                                        case 2:
-                                        case 3:
-                                            //muebles (vehiculo - otros)
-                                            str += '<tr>';
-                                            str += '<th>Bien</th>';
-                                            if (item.intId_Bien == 2) {
-                                                str += '<td colspan="3">Vehiculo</td>';
-                                            } else if (item.intId_Bien == 3) {
+                                        break;
+                                    case 2:
+                                    case 3:
+                                        //muebles (vehiculo - otros)
+                                        str += '<tr>';
+                                        str += '<th>Bien</th>';
+                                        if (item.intId_Bien == 2) {
+                                            str += '<td colspan="3">Vehiculo</td>';
+                                        } else if (item.intId_Bien == 3) {
 
-                                                str += '<td colspan="3">Otro</td>';
-                                            }
-                                            str += '</tr>';
+                                            str += '<td colspan="3">Otro</td>';
+                                        }
+                                        str += '</tr>';
 
-                                            str += '<tr>';
-                                            str += '<th>Tipo de bien</th>';
-                                            str += '<td>' + item.strNombre_Bien + '</td>';
-                                            str += '<th>Descripción / Marca-Modelo-Año</th>';
-                                            str += '<td>' + item.strDescripcion_Bien + '</td>';
-                                            str += '</tr>';
+                                        str += '<tr>';
+                                        str += '<th>Tipo de bien</th>';
+                                        str += '<td>' + item.strNombre_Bien + '</td>';
+                                        str += '<th>Descripción / Marca-Modelo-Año</th>';
+                                        str += '<td>' + item.strDescripcion_Bien + '</td>';
+                                        str += '</tr>';
 
-                                            str += '<tr>';
-                                            str += '<th>Placa / Caracteristicas</th>';
-                                            str += '<td>' + item.strCaracteristicas_Bien + '</td>';
-                                            str += '<th>Valor S/.</th>';
-                                            str += '<td>' + formatNumber(item.floValor_Bien, 2) + '</td>';
-                                            str += '</tr>';
+                                        str += '<tr>';
+                                        str += '<th>Placa / Caracteristicas</th>';
+                                        str += '<td>' + item.strCaracteristicas_Bien + '</td>';
+                                        str += '<th>Valor S/.</th>';
+                                        str += '<td>' + formatNumber(item.floValor_Bien, 2) + '</td>';
+                                        str += '</tr>';
 
-                                            str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
+                                        str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
 
-                                            $('#tblCandidatoMueble').append(str);
-                                            $('#tblCandidatoMueble').show();
+                                        $('#tblCandidatoMueble').append(str);
+                                        $('#tblCandidatoMueble').show();
 
-                                            break;
+                                        break;
                                     }
 
                                 });
@@ -1069,7 +1068,8 @@ var lista_datos = {};
         window.open("../declaraciones/declaracionpdf.aspx?c=" + idCandidato + "&p=" + idProceso + "&op=" + idOrgPolitica);
     });
 
-})();
+    return lista_datos;
+};
 // end document ready
 
 String.prototype.right = function (n) {

@@ -673,75 +673,58 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                         success: function (jsondata) {
 
                             if (jsondata.d) {
-                                $.each(jsondata.d, function (i, item) {
-                                    var str = '';
 
+                                var listaMuebles = [];
+                                var listaInmuebles = [];
+
+                                $.each(jsondata.d, function (i, item) {
                                     switch (item.intId_Bien) {
                                     case 1:
-
                                         //inmuebles
-                                        str += '<tr>';
-                                        str += '<th>Tipo de bien</th>';
-                                        str += '<td>' + item.strNombre_Bien + '</td>';
-                                        str += '<th>Dirección</th>';
-                                        str += '<td>' + item.strDescripcion_Bien + '</td>';
-                                        str += '</tr>';
+                                        var dicInmuebles = {
+                                            //Tipo de bien
+                                            tipo: item.strNombre_Bien,
+                                            direccion: item.strDescripcion_Bien,
+                                            //N° Ficha - Reg. público
+                                            registro: item.strCaracteristicas_Bien,
+                                            //Valor autovaluo S/.
+                                            valor: formatNumber(item.floValor_Bien, 2),
+                                            
+                                        };
 
-                                        str += '<tr>';
-                                        str += '<th>N° Ficha - Reg. público</th>';
-                                        str += '<td>' + item.strCaracteristicas_Bien + '</td>';
-                                        str += '<th>Valor autovaluo S/.</th>';
-                                        str += '<td>' + formatNumber(item.floValor_Bien, 2) + '</td>';
-                                        str += '</tr>';
-
-                                        str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-
-                                        $('#tblCandidatoInmueble').append(str);
-                                        $('#tblCandidatoInmueble').show();
-
+                                        listaInmuebles.push(dicInmuebles);
                                         break;
                                     case 2:
                                     case 3:
                                         //muebles (vehiculo - otros)
-                                        str += '<tr>';
-                                        str += '<th>Bien</th>';
+
+                                        var dicMuebles ={
+                                            //Tipo de bien
+                                            tipoe: item.strNombre_Bien,
+                                            //Descripción / Marca-Modelo-Año
+                                            descripcion: item.strDescripcion_Bien,
+                                            //Placa / Caracteristicas
+                                            caracteristicas: item.strCaracteristicas_Bien,
+                                            //Valor S/.
+                                            valor: formatNumber(item.floValor_Bien, 2),
+                                        };
+
                                         if (item.intId_Bien == 2) {
-                                            str += '<td colspan="3">Vehiculo</td>';
+                                            dicMuebles["bien"] = "Vehiculo";
                                         } else if (item.intId_Bien == 3) {
-
-                                            str += '<td colspan="3">Otro</td>';
+                                            dicMuebles["bien"] = "Otro";
                                         }
-                                        str += '</tr>';
-
-                                        str += '<tr>';
-                                        str += '<th>Tipo de bien</th>';
-                                        str += '<td>' + item.strNombre_Bien + '</td>';
-                                        str += '<th>Descripción / Marca-Modelo-Año</th>';
-                                        str += '<td>' + item.strDescripcion_Bien + '</td>';
-                                        str += '</tr>';
-
-                                        str += '<tr>';
-                                        str += '<th>Placa / Caracteristicas</th>';
-                                        str += '<td>' + item.strCaracteristicas_Bien + '</td>';
-                                        str += '<th>Valor S/.</th>';
-                                        str += '<td>' + formatNumber(item.floValor_Bien, 2) + '</td>';
-                                        str += '</tr>';
-
-                                        str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-
-                                        $('#tblCandidatoMueble').append(str);
-                                        $('#tblCandidatoMueble').show();
-
+                                        listaMuebles.push(dicMuebles);
                                         break;
                                     }
 
                                 });
+                                
+                                imprimeDato("lblMuebles", listaMuebles);
+                                imprimeDato("lblInmuebles", listaInmuebles);
                             }
 
-                        }, error: function (xhr, status, error) {
-                            $("#divAlert").dialog('open');
-                            $("#spnAlert").empty().html(xhr.responseText);
-                        }
+                        },
                     });
                 }
                 //

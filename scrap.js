@@ -1,22 +1,20 @@
-//creacion de objeto candidato
-var objCandidatoBE = new Object();
-objCandidatoBE.objProcesoElectoralBE = new Object();
-objCandidatoBE.objOpInscritasBE = new Object();
-objCandidatoBE.objAmbitoBE = new Object();
-objCandidatoBE.objCargoAutoridadBE = new Object();
-objCandidatoBE.objUbigeoPostulaBE = new Object();
-objCandidatoBE.objUbigeoNacimientoBE = new Object();
-objCandidatoBE.objUbigeoResidenciaBE = new Object();
-objCandidatoBE.objUsuarioBE = new Object();
 
-var strMsgHastaActualidad = 'Hasta la actualidad';
-
-
-
-
-
-// document ready
 var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
+
+    //creacion de objeto candidato
+    var objCandidatoBE = new Object();
+    objCandidatoBE.objProcesoElectoralBE = new Object();
+    objCandidatoBE.objOpInscritasBE = new Object();
+    objCandidatoBE.objAmbitoBE = new Object();
+    objCandidatoBE.objCargoAutoridadBE = new Object();
+    objCandidatoBE.objUbigeoPostulaBE = new Object();
+    objCandidatoBE.objUbigeoNacimientoBE = new Object();
+    objCandidatoBE.objUbigeoResidenciaBE = new Object();
+    objCandidatoBE.objUsuarioBE = new Object();
+
+    var strMsgHastaActualidad = 'Hasta la actualidad';
+
+
     var lista_datos = {};
 
     var imprimeDato = function imprime_dato(tipo,cadena)
@@ -40,17 +38,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
     objOPInscritasBE.intCod_OP = idOrgPolitica;
     objOPInscritasBE.objProcesoElectoralBE.intIdProceso = idProceso;
 
-    $.ajax({
-        url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/OP_ObtenerNombrePorID",
-        data: '{"objOPInscritasBE":' + JSON.stringify(objOPInscritasBE) + '}',
-        dataType: "json",
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        success: function (jsondata) {
-            $("#txtOrganizacionPolitica").html(jsondata.d.strDES_OP);
-        }
-    });
-
+    //Verifica si existe candidato
     $.ajax({
         url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/CandidatoListarPorID",
         data: '{"objCandidatoBE":' + JSON.stringify(objCandidatoBE) + '}',
@@ -193,8 +181,8 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                         }
 
                         if (jsondata.d) {
-                            var itemcount = 0;
-                            var lista_tabla = [];
+                            
+                            var listaExperiencia = [];
                             $.each(jsondata.d, function (i, item) {
                                 
 
@@ -212,11 +200,11 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                     ubicacion: (item.objUbigeoExperiencia.strDepartamento + ' - ' + item.objUbigeoExperiencia.strProvincia + ' - ' + item.objUbigeoExperiencia.strDistrito )
                                 };
 
-                                lista_tabla.push(dic_laboral);
+                                listaExperiencia.push(dic_laboral);
                                 
 
                             });
-                            imprimeDato("lblExperiencia",lista_tabla);
+                            imprimeDato("lblExperiencia",listaExperiencia);
                         }
                         
                     }, error: function (xhr, status, error) {
@@ -238,7 +226,10 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
 
                             var itemcountPri = 0;
                             var itemcountSec = 0;
-
+                            //--
+                            var lista_primaria = [];
+                            var lista_secundaria = [];
+                            //--
 
                             $.each(jsondata.d, function (i, item) {
 
@@ -256,7 +247,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
 
                                 switch (item.intTipoEducacion) {
                                 case 1: //primaria                                       
-
+                                    //--
                                     switch (item.strPrimaria * 1) {
                                     case 0:
                                         _concluidoPriText = 'No concluido';
@@ -268,39 +259,26 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                         _concluidoPriText = 'No cuenta con estudios';
                                         break;
                                     }
-
-
-                                    str += '<tr>';
-                                    str += '<th style="width:20%" >Institución Educativa</th>';
-                                    str += '<td style="width:30%">' + item.strCentroPrimaria + '</td>';
-                                    str += '<th style="width:20%">Lugar</th>';
-                                    if (item.strFgExtranjero == "1") {
-                                        str += '<td style="width:30%">' + item.strPais + '</td>';
+                                    
+                                    var dicPrimaria = {
+                                        instEducativa: item.strCentroPrimaria,
+                                        concluido: _concluidoPriText,
+                                        periodo: (item.intAnioInicioPrimaria + ' - ' + (item.intAnioFinPrimaria == 0 ? strMsgHastaActualidad : item.intAnioFinPrimaria)),
+                                    }
+                                    if (item.strFgExtranjero == "1") {                                        
+                                        dicPrimaria["lugar"] = item.strPais
                                     } else {
-                                        str += '<td style="width:30%">PERÚ - ' + item.objUbigeoPrimaria.strDepartamento + ' - ' + item.objUbigeoPrimaria.strProvincia + ' - ' + item.objUbigeoPrimaria.strDistrito + '</td>';
+                                        dicPrimaria["lugar"] = (item.objUbigeoPrimaria.strDepartamento + ' - ' + 
+                                                                item.objUbigeoPrimaria.strProvincia + ' - ' + 
+                                                                item.objUbigeoPrimaria.strDistrito);                                        
                                     }
-                                    str += '</tr>';
-                                    str += '<tr>';
-                                    str += '<th>Concluido</th>';
-                                    str += '<td>' + _concluidoPriText + '</td>';
-                                    str += '<th>Período</th>';
-                                    str += '<td>' + item.intAnioInicioPrimaria + ' - ' + (item.intAnioFinPrimaria == 0 ? strMsgHastaActualidad : item.intAnioFinPrimaria) + '</td>';
-
-                                    itemcountPri += 1;
-
-
-                                    if (jsondata.d.length > itemcountPri) {
-                                        str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-                                    }
-
-                                    $('#tblEducacionPrimaria').show();
-                                    $('#tblEducacionPrimaria').append(str);
-                                    str = '';
-
+                                    itemcountPri+=1;
+                                    lista_primaria.push(dicPrimaria);
+                                    //--
                                     break;
 
                                 case 2: //secundaria                                      
-
+                                    //--
                                     switch (item.strSecundaria * 1) {
                                     case 0:
                                         _concluidoSecText = 'No concluido';
@@ -313,31 +291,22 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                         break;
                                     }
 
-                                    str += '<tr>';
-                                    str += '<th style="width:20%" >Institución Educativa</th>';
-                                    str += '<td style="width:30%">' + item.strCentroSecundaria + '</td>';
-                                    str += '<th style="width:20%">Lugar</th>';
-                                    if (item.strFgExtranjero == "1") {
-                                        str += '<td style="width:30%">' + item.strPais + '</td>';
+                                    
+                                     var dicSecundaria = {
+                                        instEducativa: item.strCentroSecundaria,
+                                        concluido: _concluidoSecText,
+                                        periodo: (item.intAnioInicioSecundaria + ' - ' + (item.intAnioFinSecundaria == 0 ? strMsgHastaActualidad : item.intAnioFinSecundaria)),
+                                    }
+                                    if (item.strFgExtranjero == "1") {                                        
+                                        dicSecundaria["lugar"] = item.strPais
                                     } else {
-                                        str += '<td style="width:30%">PERÚ - ' + item.objUbigeoSecundaria.strDepartamento + ' - ' + item.objUbigeoSecundaria.strProvincia + ' - ' + item.objUbigeoSecundaria.strDistrito + '</td>';
+                                        dicSecundaria["lugar"] = (item.objUbigeoSecundaria.strDepartamento + ' - ' + 
+                                                                item.objUbigeoSecundaria.strProvincia + ' - ' + 
+                                                                item.objUbigeoSecundaria.strDistrito);                                        
                                     }
-                                    str += '</tr>';
-                                    str += '<tr>';
-                                    str += '<th>Concluido</th>';
-                                    str += '<td>' + _concluidoSecText + '</td>';
-                                    str += '<th>Período</th>';
-                                    str += '<td>' + item.intAnioInicioSecundaria + ' - ' + (item.intAnioFinSecundaria == 0 ? strMsgHastaActualidad : item.intAnioFinSecundaria) + '</td>';
-
-                                    itemcountSec += 1;
-
-                                    if (jsondata.d.length > itemcountSec) {
-                                        str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-                                    }
-
-                                    $('#tblEducacionSecundaria').show();
-                                    $('#tblEducacionSecundaria').append(str);
-                                    str = '';
+                                    itemcountSec+=1;
+                                    lista_secundaria.push(dicSecundaria) ;
+                                    //--
                                     break;
 
                                 }
@@ -345,8 +314,10 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             });
 
                             if (itemcountPri < 1) { imprimeDato("lblEducacionPrimaria",'No cuenta con educación primaria.') }
+                            else { imprimeDato("lblEducacionPrimaria", lista_primaria )}
                             if (itemcountSec < 1) { imprimeDato("lblEducacionSecundaria",'No cuenta con educacion secundaria.') }
-
+                            else { imprimeDato("lblEducacionSecundaria", lista_secundaria)}
+                            
 
                         }
 
@@ -1045,10 +1016,6 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                 });
 
 
-
-
-
-
             }
         },
         error: function (xhr, status, error) {
@@ -1057,17 +1024,14 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
         }
     });
 
-    $('#btnImprimir').click(function (e) {
-        $(this).hide();
-        window.focus();
-        window.print();
-        $(this).show();
-    });
+/*
+    var all_done=0;
 
-    $('#btnDescargarPDF').click(function (e) {
-        window.open("../declaraciones/declaracionpdf.aspx?c=" + idCandidato + "&p=" + idProceso + "&op=" + idOrgPolitica);
-    });
-
+    while(! all_done){
+    $(document).ajaxStop(
+        function done(){all_done=1;});
+    }
+*/
     return lista_datos;
 };
 // end document ready
@@ -1076,13 +1040,7 @@ String.prototype.right = function (n) {
     return this.substr((this.length - n), this.length);
 };
 
-function getUrlVars() {
-    var vars = {};
-    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
-        vars[key] = value;
-    });
-    return vars;
-}
+
 
 function formatNumber(number, decimal) {
     return parseFloat(Math.round(number * 100) / 100).toFixed(decimal);

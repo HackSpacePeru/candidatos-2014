@@ -82,9 +82,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                 imprimeDato("txtLugarProvinciaRes",objCandidato.objUbigeoResidenciaBE.strProvincia)
                 imprimeDato("txtLugarDistritoRes",objCandidato.objUbigeoResidenciaBE.strDistrito)
                 imprimeDato("txtTiempoRes",objCandidato.strTiempo_Residencia + ' años')
-
-                               
-                if (objCandidato.strCargo_Eleccion == 0) { imprimeDato("lblCargosEleccion",'No cuenta con cargos de elección popular.') }
+                                               
                 if (objCandidato.strInmuebles == 0 || objCandidato.strInmuebles == '') { imprimeDato("lblInmuebles",'No registró información.') }
                 if (objCandidato.strMuebles == 0 || objCandidato.strMuebles == '') { imprimeDato("lblMuebles",'No registró información.') }
 
@@ -300,8 +298,6 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             //--
 
                             $.each(jsondata.d, function (i, item) {
-                                var str = '';
-
                                 var dep = item.objUbigeoBE.strUbigeo.substring(0, 2);
                                 var pro = item.objUbigeoBE.strUbigeo.substring(2, 4);
                                 var dis = item.objUbigeoBE.strUbigeo.substring(4, 6);
@@ -391,7 +387,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     }
                 });
 
-                /* candidato cargos partidario */
+                /* candidato cargos partidarios */
                 $.ajax({
                     url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/CargoPartidarioListarPorCandidato",
                     data: '{"objCandidatoBE":' + JSON.stringify(objCandidatoBE) + '}',
@@ -404,7 +400,6 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             var listaCargosParidarios = [];
 
                             $.each(jsondata.d, function (i, item) {
-                                var str = '';
                                 dicCargosPartidarios = {
                                     orgPolitica:  item.strOrganizacionPolitica,
                                     ambito:  item.objAmbitoBE.strAmbito,
@@ -441,8 +436,6 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             var listaCargoEleccion = [];
 
                             $.each(jsondata.d, function (i, item) {
-
-                                var str = '';
                                 var _dep = "";
                                 var _pro = "";
                                 var _dis = "";
@@ -488,31 +481,26 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
                     success: function (jsondata) {
-
-                        if (jsondata.d.length == 0) {
-                            imprimeDato("lblMilitancia",'No cuenta con militancia en otros partidos.')
-                        }
-
                         if (jsondata.d) {
+
+                            var listaRenuncias = [];
+
                             $.each(jsondata.d, function (i, item) {
-                                var str = '';
+                                
+                                var dicRenuncias ={
+                                    //Denominación de la O.P. a la que renunció o cuya inscripción fue cancelada
+                                    orgPolitica:  item.strOrgPolitica,
+                                    periodo: ( item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal)),
+                                };
 
-                                str += '<tr>';
-                                str += '<th coslpan="2">Denominación de la O.P. a la que renunció o cuya inscripción fue cancelada</th>';
-                                str += '<td coslpan="2">' + item.strOrgPolitica + '</td>';
-                                str += '</tr>';
-                                str += '<tr>';
-                                str += '<th>Periodo</th>';
-                                str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>';
-                                str += '</tr>';
-                                str += '<tr><td colspan="2" class="separatorItem">&nbsp;</td></tr>';
-
-                                $('#tblRenuncias').append(str);
-                                $('#tblRenuncias').show();
-
+                                listaRenuncias.push(dicRenuncias);
                             });
                         }
-
+                        if (jsondata.d.length == 0) {
+                            imprimeDato("lblMilitancia",'No cuenta con militancia en otros partidos.');
+                        }
+                        else{
+                        imprimeDato("lblMilitancia",listaRenuncias);}
                     }, error: function (xhr, status, error) {
                         imprimeDato("lblMilitancia",'No se pudo obtener la información, vuelva a  intentar.')
                     }

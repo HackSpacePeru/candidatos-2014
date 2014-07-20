@@ -647,7 +647,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                 imprimeDato("txtCandidatoIngresoTotal",formatNumber((objCandidatoIngresosBE.floRemuneracionTotal * 1) + (objCandidatoIngresosBE.floRentaTotal * 1) + (objCandidatoIngresosBE.floOtrosTotal * 1), 2))
 
                                 if (objCandidatoIngresosBE.floRemuneracionPublico >= 0 || objCandidatoIngresosBE.floRemuneracionPrivado >= 0 || objCandidatoIngresosBE.floRentaPublico >= 0 || objCandidatoIngresosBE.floRentaPrivado >= 0 || objCandidatoIngresosBE.floOtrosPublico >= 0 || objCandidatoIngresosBE.floOtrosPrivado >= 0) {
-                                    $('#tblIngresos').show();
+                                    imprimeDato("lblIngresos", "Hay informacion disponible")
                                 } else {
                                     imprimeDato("lblIngresos",'No registró información.')
                                 }

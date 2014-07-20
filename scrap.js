@@ -58,41 +58,52 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
         async: false,
         success: function (jsondata) {
             if (jsondata.d) {
-                var str = '';
+                
 
                 var objCandidato = new Object();
                 objCandidato = jsondata.d;
 
                 // Datos principales
-                imprimeDato("txNroRegistro",objCandidato.strRegistro_Org_Pol)
-                imprimeDato("txtCargoPostula",objCandidato.objCargoAutoridadBE.strCargoAutoridad)
-                imprimeDato("txtLugarPostula",objCandidato.objUbigeoPostulaBE.strDepartamento + ' - ' + objCandidato.objUbigeoPostulaBE.strProvincia + ' - ' + objCandidato.objUbigeoPostulaBE.strDistrito)
-                imprimeDato("txtFormaDesignacion",objCandidato.strFormaDesignacion)
-                imprimeDato("txtDNI",objCandidato.strDNI)
-                imprimeDato("txtApellidoPaterno",objCandidato.strAPaterno.toUpperCase())
-                imprimeDato("txtApellidoMaterno",objCandidato.strAMaterno.toUpperCase())
-                imprimeDato("txtNombres",objCandidato.strNombres.toUpperCase())
-                imprimeDato("txtFechaNacimiento",objCandidato.strFecha_Nac.substring(6, 8) + '/' + objCandidato.strFecha_Nac.substring(4, 6) + '/' + objCandidato.strFecha_Nac.substring(0, 4))
-                if (objCandidato.intId_Sexo == 1) {
-                    imprimeDato("txtSexo",'Masculino')
-                } else {
-                    imprimeDato("txtSexo",'Femenino')
-                }
-                imprimeDato("txtCorreoElectronico",objCandidato.strCorreo)
 
-                //nacimiento
-                imprimeDato("txtPais",objCandidato.strPais)
-                imprimeDato("txtDepartamentoNac",objCandidato.objUbigeoNacimientoBE.strDepartamento)
-                imprimeDato("txtProvinciaNac",objCandidato.objUbigeoNacimientoBE.strProvincia)
-                imprimeDato("txtDistritoNac",objCandidato.objUbigeoNacimientoBE.strDistrito)
+                var dicPostulacion = {
+                    //Cargo al que postula
+                    cargo: objCandidato.objCargoAutoridadBE.strCargoAutoridad,
+                    //Lugar al que postula
+                    lugar: (objCandidato.objUbigeoPostulaBE.strDepartamento + ' - ' + objCandidato.objUbigeoPostulaBE.strProvincia + ' - ' + objCandidato.objUbigeoPostulaBE.strDistrito),
+                    //Forma de designación
+                    designacion: objCandidato.strFormaDesignacion,
+                };
+                imprimeDato("postulacion", dicPostulacion);
 
-                //residencia
-                imprimeDato("txtLugarResicencia",objCandidato.strResidencia)
-                imprimeDato("txtLugarDepartamentoRes",objCandidato.objUbigeoResidenciaBE.strDepartamento)
-                imprimeDato("txtLugarProvinciaRes",objCandidato.objUbigeoResidenciaBE.strProvincia)
-                imprimeDato("txtLugarDistritoRes",objCandidato.objUbigeoResidenciaBE.strDistrito)
-                imprimeDato("txtTiempoRes",objCandidato.strTiempo_Residencia + ' años')
-                                               
+                var dicDatosPersonales = {
+                    dni: objCandidato.strDNI,
+                    apellidoPaterno: objCandidato.strAPaterno.toUpperCase(),
+                    apellidoMaterno: objCandidato.strAMaterno.toUpperCase(),
+                    nombres: objCandidato.strNombres.toUpperCase(),
+                    sexo: (objCandidato.intId_Sexo?'Masculino': 'Femenino'),
+                    email: objCandidato.strCorreo,
+                };
+                imprimeDato("datosPersonales", dicDatosPersonales);
+
+                var dicNacimiento = {
+                    fecha: (objCandidato.strFecha_Nac.substring(6, 8) + '/' + objCandidato.strFecha_Nac.substring(4, 6) + '/' + objCandidato.strFecha_Nac.substring(0, 4)),
+                    pais: objCandidato.strPais,
+                    departamento: objCandidato.objUbigeoNacimientoBE.strDepartamento,
+                    provincia: objCandidato.objUbigeoNacimientoBE.strProvincia,
+                    distrito: objCandidato.objUbigeoNacimientoBE.strDistrito,
+                };
+                imprimeDato("nacimiento", dicNacimiento);
+
+                var dicResidencia = {
+                    lugar: objCandidato.strResidencia,
+                    departamento: objCandidato.objUbigeoResidenciaBE.strDepartamento,
+                    provincia: objCandidato.objUbigeoResidenciaBE.strProvincia,
+                    distrito: objCandidato.objUbigeoResidenciaBE.strDistrito,
+                    //Tiempo residencia
+                    tiempo: (objCandidato.strTiempo_Residencia + ' años'),
+                };
+                imprimeDato("residencia",dicResidencia);
+
                 if (objCandidato.strInmuebles == 0 || objCandidato.strInmuebles == '') { imprimeDato("lblInmuebles",'No registró información.') }
                 if (objCandidato.strMuebles == 0 || objCandidato.strMuebles == '') { imprimeDato("lblMuebles",'No registró información.') }
 
@@ -107,19 +118,22 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     success: function (jsondata) {
                         if (jsondata.d) {
 
+                            var dicFamilia = {};
+
                             $.each(jsondata.d, function (i, item) {
                                 switch (item.objTipoBE.intTipo) {
                                 case 1:
-                                    imprimeDato("txtPadre",item.strNombres.toUpperCase())
+                                    dicFamilia["padre"] = item.strNombres.toUpperCase();
                                     break;
                                 case 2:
-                                    imprimeDato("txtMadre",item.strNombres.toUpperCase())
+                                    dicFamilia["madre"] = item.strNombres.toUpperCase();
                                     break;
                                 case 3:
-                                    imprimeDato("txtConyuge",item.strNombres.toUpperCase())
+                                    dicFamilia["conyuge"] = item.strNombres.toUpperCase();
                                     break;
                                 }
                             });
+                            imprimeDato("familia", dicFamilia);
                         }
                     },
                 });
@@ -142,9 +156,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             
                             var listaExperiencia = [];
                             $.each(jsondata.d, function (i, item) {
-                                
 
-                                var str = '';
                                 var dep = item.objUbigeoExperiencia.strUbigeo.substring(0, 2);
                                 var pro = item.objUbigeoExperiencia.strUbigeo.substring(2, 4);
                                 var dis = item.objUbigeoExperiencia.strUbigeo.substring(4, 6);
@@ -155,21 +167,21 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                     cargo:  item.strCargo,
                                     iniciaAnio: item.intInicioAnio,
                                     finAnio: (item.intFinAnio == 0 ? strMsgHastaActualidad : item.intFinAnio),
-                                    ubicacion: (item.objUbigeoExperiencia.strDepartamento + ' - ' + item.objUbigeoExperiencia.strProvincia + ' - ' + item.objUbigeoExperiencia.strDistrito )
+                                    ubicacion: (item.objUbigeoExperiencia.strDepartamento + ' - ' + item.objUbigeoExperiencia.strProvincia + ' - ' + item.objUbigeoExperiencia.strDistrito ),
                                 };
 
                                 listaExperiencia.push(dic_laboral);
-                                
 
                             });
-                            imprimeDato("lblExperiencia",listaExperiencia);
+                            imprimeDato("experiencia",listaExperiencia);
                         }
                         
                     }, error: function (xhr, status, error) {
-                        imprimeDato("lblExperiencia",'No se pudo obtener la información, vuelva a  intentar.');
+                        imprimeDato("experiencia",'error');
                     }
                 });
 
+                var dicEducacion = {};
 
                 /* candidato educacion basica */
                 $.ajax({
@@ -190,8 +202,6 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             //--
 
                             $.each(jsondata.d, function (i, item) {
-
-                                var str = '';
 
                                 var _iddepPri = item.objUbigeoPrimaria.strUbigeo.substring(0, 2);
                                 var _idproPri = item.objUbigeoPrimaria.strUbigeo.substring(2, 4);
@@ -224,7 +234,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                         periodo: (item.intAnioInicioPrimaria + ' - ' + (item.intAnioFinPrimaria == 0 ? strMsgHastaActualidad : item.intAnioFinPrimaria)),
                                     }
                                     if (item.strFgExtranjero == "1") {                                        
-                                        dicPrimaria["lugar"] = item.strPais
+                                        dicPrimaria["lugar"] = item.strPais;
                                     } else {
                                         dicPrimaria["lugar"] = (item.objUbigeoPrimaria.strDepartamento + ' - ' + 
                                                                 item.objUbigeoPrimaria.strProvincia + ' - ' + 
@@ -250,7 +260,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                     }
 
                                     
-                                     var dicSecundaria = {
+                                    var dicSecundaria = {
                                         instEducativa: item.strCentroSecundaria,
                                         concluido: _concluidoSecText,
                                         periodo: (item.intAnioInicioSecundaria + ' - ' + (item.intAnioFinSecundaria == 0 ? strMsgHastaActualidad : item.intAnioFinSecundaria)),
@@ -258,12 +268,12 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                     if (item.strFgExtranjero == "1") {                                        
                                         dicSecundaria["lugar"] = item.strPais
                                     } else {
-                                        dicSecundaria["lugar"] = (item.objUbigeoSecundaria.strDepartamento + ' - ' + 
-                                                                item.objUbigeoSecundaria.strProvincia + ' - ' + 
-                                                                item.objUbigeoSecundaria.strDistrito);                                        
+                                        dicSecundaria["lugar"] = (item.objUbigeoSecundaria.strDepartamento + ' - ' +
+                                                                  item.objUbigeoSecundaria.strProvincia + ' - ' +
+                                                                  item.objUbigeoSecundaria.strDistrito);
                                     }
                                     itemcountSec+=1;
-                                    lista_secundaria.push(dicSecundaria) ;
+                                    lista_secundaria.push(dicSecundaria);
                                     //--
                                     break;
 
@@ -279,9 +289,10 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
 
                         }
 
-                    }, error: function (xhr, status, error) {
-                        imprimeDato("lblEducacionPrimaria",'No se pudo obtener la información, vuelva a  intentar.')
-                        imprimeDato("lblEducacionSecundaria",'No se pudo obtener la información, vuelva a  intentar.')
+                    }, 
+                    error: function (xhr, status, error) {
+                        imprimeDato("lblEducacionPrimaria",'error');
+                        imprimeDato("lblEducacionSecundaria",'error');
                     }
                 });
 
@@ -385,17 +396,20 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             imprimeDato("lblEducacionTecnico",listaTecnico);
                             imprimeDato("lblEducacionUniversitario",listaUniversitario);
                             imprimeDato("lblEducacionPostgrado",listaPostgrado);
-                            if (itemcountTec < 1) { imprimeDato("lblEducacionTecnico",'No cuenta con educación técnica.') }
-                            if (itemcountUni < 1) { imprimeDato("lblEducacionUniversitario",'No cuenta con educación universitaria.') }
-                            if (itemcountPos < 1) { imprimeDato("lblEducacionPostgrado",'No cuenta con educación en postgrado.') }
+                            if (itemcountTec < 1) { imprimeDato("lblEducacionTecnico",'No cuenta con educación técnica.'); }
+                            if (itemcountUni < 1) { imprimeDato("lblEducacionUniversitario",'No cuenta con educación universitaria.'); }
+                            if (itemcountPos < 1) { imprimeDato("lblEducacionPostgrado",'No cuenta con educación en postgrado.'); }
                         }
 
-                    }, error: function (xhr, status, error) {
-                        imprimeDato("lblEducacionTecnico",'No se pudo obtener la información, vuelva a  intentar.')
-                        imprimeDato("lblEducacionUniversitario",'No se pudo obtener la información, vuelva a  intentar.')
-                        imprimeDato("lblEducacionPostgrado",'No se pudo obtener la información, vuelva a  intentar.')
+                    },
+                    error: function (xhr, status, error) {
+                        imprimeDato("lblEducacionTecnico",'error');
+                        imprimeDato("lblEducacionUniversitario",'error');
+                        imprimeDato("lblEducacionPostgrado",'error');
                     }
                 });
+
+                //imprimeDato("educacion",dicEducacion);
 
                 /* candidato cargos partidarios */
                 $.ajax({
@@ -427,7 +441,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             imprimeDato("lblCargosPartidarios", listaCargosParidarios)}
 
                     }, error: function (xhr, status, error) {
-                        imprimeDato("lblCargosPartidarios",'No se pudo obtener la información, vuelva a  intentar.')
+                        imprimeDato("lblCargosPartidarios", "error");
                     }
                 });
 
@@ -475,11 +489,11 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             if (jsondata.d.length == 0) {
                                 imprimeDato("lblCargosEleccion",'No cuenta con cargos de elección popular.');}
                             else{
-                            imprimeDato("lblCargosEleccion",listaCargoEleccion);}
+                                imprimeDato("lblCargosEleccion",listaCargoEleccion);}
                         }
 
                     }, error: function (xhr, status, error) {
-                        imprimeDato("lblCargosEleccion",'No se pudo obtener la información, vuelva a  intentar.')
+                        imprimeDato("lblCargosEleccion", "error");
                     }
                 });
 
@@ -492,7 +506,6 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     contentType: "application/json; charset=utf-8",
                     success: function (jsondata) {
                         if (jsondata.d) {
-
                             var listaRenuncias = [];
 
                             $.each(jsondata.d, function (i, item) {
@@ -502,18 +515,18 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                     orgPolitica:  item.strOrgPolitica,
                                     periodo: ( item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal)),
                                 };
-
                                 listaRenuncias.push(dicRenuncias);
                             });
                         }
                         if (jsondata.d.length == 0) {
-                            imprimeDato("lblMilitancia",'No cuenta con militancia en otros partidos.');
+                            imprimeDato("lblMilitancia", 'No cuenta con militancia en otros partidos.');
                         }
                         else{
-                        imprimeDato("lblMilitancia",listaRenuncias);}
-                    }, error: function (xhr, status, error) {
-                        imprimeDato("lblMilitancia",'No se pudo obtener la información, vuelva a  intentar.')
-                    }
+                            imprimeDato("lblMilitancia", listaRenuncias);}
+                    }, 
+                    error: function (xhr, status, error) {
+                        imprimeDato("lblMilitancia", "error");
+                    },
                 });
 
 
@@ -549,11 +562,12 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                 imprimeDato("lblAmbitoPenal",'No cuenta con antecedentes penales.');
                             }
                             else{
-                            imprimeDato("lblAmbitoPenal", listaPenal);}
+                                imprimeDato("lblAmbitoPenal", listaPenal);}
                         }
 
-                    }, error: function (xhr, status, error) {
-                        imprimeDato("lblAmbitoPenal",'No se pudo obtener la información, vuelva a  intentar.')
+                    }, 
+                    error: function (xhr, status, error) {
+                        imprimeDato("lblAmbitoPenal", "error");
                     }
                 });
 
@@ -589,12 +603,13 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             imprimeDato("lblAmbitoCivil",'No cuenta con antecedentes civiles.');
                         }
                         else{
-                        imprimeDato("lblAmbitoCivil", listaCivil);}
+                            imprimeDato("lblAmbitoCivil", listaCivil);}
 
 
-                    }, error: function (xhr, status, error) {
-                        imprimeDato("lblAmbitoCivil",'No se pudo obtener la información, vuelva a  intentar.')
-                    }
+                    }, 
+                    error: function (xhr, status, error) {
+                        imprimeDato("lblAmbitoCivil", "error");
+                    },
                 });
 
 
@@ -625,9 +640,10 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                 imprimeDato("lblOtraExperiencia",listaOtraExperiencia);
                             }
 
-                        }, error: function (xhr, status, error) {
-                            imprimeDato("lblOtraExperiencia",'No se pudo obtener la información, vuelva a  intentar.')
-                        }
+                        },
+                        error: function (xhr, status, error) {
+                            imprimeDato("lblOtraExperiencia", "error");
+                        },
                     });
                 } else if (objCandidato.strExperienciaOtra == '0' || objCandidato.strExperienciaOtra == '') {
                     imprimeDato("lblOtraExperiencia",'No registró información.')
@@ -645,182 +661,185 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
 
                             if (jsondata.d) {
                                 objCandidatoIngresosBE = jsondata.d;
-                                imprimeDato("txtIngresoRemuneracionPublica",formatNumber(objCandidatoIngresosBE.floRemuneracionPublico, 2))
-                                imprimeDato("txtIngresoRemuneracionPrivada",formatNumber(objCandidatoIngresosBE.floRemuneracionPrivado, 2))
-                                imprimeDato("txtIngresoRemuneracionTotal",formatNumber(objCandidatoIngresosBE.floRemuneracionTotal, 2))
-                                imprimeDato("txtIngresoRentaPublica",formatNumber(objCandidatoIngresosBE.floRentaPublico, 2))
-                                imprimeDato("txtIngresoRentaPrivada",formatNumber(objCandidatoIngresosBE.floRentaPrivado, 2))
-                                imprimeDato("txtIngresoRentaTotal",formatNumber(objCandidatoIngresosBE.floRentaTotal, 2))
-                                imprimeDato("txtIngresoOtrosPublico",formatNumber(objCandidatoIngresosBE.floOtrosPublico, 2))
-                                imprimeDato("txtIngresoOtrosPrivado",formatNumber(objCandidatoIngresosBE.floOtrosPrivado, 2))
-                                imprimeDato("txtIngresoOtrosTotal",formatNumber(objCandidatoIngresosBE.floOtrosTotal, 2))
-                                imprimeDato("txtCandidatoIngresoTotal",formatNumber((objCandidatoIngresosBE.floRemuneracionTotal * 1) + (objCandidatoIngresosBE.floRentaTotal * 1) + (objCandidatoIngresosBE.floOtrosTotal * 1), 2))
 
-                                if (objCandidatoIngresosBE.floRemuneracionPublico >= 0 || objCandidatoIngresosBE.floRemuneracionPrivado >= 0 || objCandidatoIngresosBE.floRentaPublico >= 0 || objCandidatoIngresosBE.floRentaPrivado >= 0 || objCandidatoIngresosBE.floOtrosPublico >= 0 || objCandidatoIngresosBE.floOtrosPrivado >= 0) {
-                                    imprimeDato("lblIngresos", "Hay informacion disponible")
-                                } else {
-                                    imprimeDato("lblIngresos",'No registró información.')
-                                }
+                                var dicIngresos = {
+                                    //REMUNERACIÓN BRUTA MENSUAL S/.
+                                    remuneracion: {
+                                        publico: formatNumber(jsondata.d.floRemuneracionPublico, 2),
+                                        privado: formatNumber(jsondata.d.floRemuneracionPrivado, 2),
+                                        total:   formatNumber(jsondata.d.floRemuneracionTotal, 2),
+                                    },
+                                    //RENTA BRUTA MENSUAL POR EJERCICIO INDIVIDUAL S/.
+                                    renta: {
+                                        publico: formatNumber(jsondata.d.floRentaPublico, 2),
+                                        privado: formatNumber(jsondata.d.floRentaPrivado, 2),
+                                        total:   formatNumber(jsondata.d.floRentaTotal, 2),
+                                    },
+                                    //OTROS INGRESOS MENSUALES S/.
+                                    otros: {
+                                        publico: formatNumber(jsondata.d.floOtrosPublico, 2),
+                                        privado: formatNumber(jsondata.d.floOtrosPrivado, 2),
+                                        total:   formatNumber(jsondata.d.floOtrosTotal, 2),
+                                    },
+                                    //Total S/.
+                                    total: formatNumber((jsondata.d.floRemuneracionTotal * 1) + (jsondata.d.floRentaTotal * 1) + (jsondata.d.floOtrosTotal * 1), 2),
+                                };
+                                imprimeDato("ingresos",dicIngresos);
 
                             }
 
-                        }, error: function (xhr, status, error) {
-                            imprimeDato("lblIngresos",'No se pudo obtener la información, vuelva a  intentar.')
-                        }
-                    });
-                } else if (objCandidato.strIngresos == '0' || objCandidato.strIngresos == '') {
-
-                }
-
-                /* candidato bienes inmuebles - muebles */
-                if (objCandidato.strInmuebles == '1' || objCandidato.strMuebles == '1') {
-                    $.ajax({
-                        url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/BienesListarPorCandidato",
-                        data: '{"objCandidatoBE":' + JSON.stringify(objCandidatoBE) + '}',
-                        dataType: "json",
-                        type: "POST",
-                        contentType: "application/json; charset=utf-8",
-                        success: function (jsondata) {
-
-                            if (jsondata.d) {
-
-                                var listaMuebles = [];
-                                var listaInmuebles = [];
-
-                                $.each(jsondata.d, function (i, item) {
-                                    switch (item.intId_Bien) {
-                                    case 1:
-                                        //inmuebles
-                                        var dicInmuebles = {
-                                            //Tipo de bien
-                                            tipo: item.strNombre_Bien,
-                                            direccion: item.strDescripcion_Bien,
-                                            //N° Ficha - Reg. público
-                                            registro: item.strCaracteristicas_Bien,
-                                            //Valor autovaluo S/.
-                                            valor: formatNumber(item.floValor_Bien, 2),
-                                            
-                                        };
-
-                                        listaInmuebles.push(dicInmuebles);
-                                        break;
-                                    case 2:
-                                    case 3:
-                                        //muebles (vehiculo - otros)
-
-                                        var dicMuebles ={
-                                            //Tipo de bien
-                                            tipoe: item.strNombre_Bien,
-                                            //Descripción / Marca-Modelo-Año
-                                            descripcion: item.strDescripcion_Bien,
-                                            //Placa / Caracteristicas
-                                            caracteristicas: item.strCaracteristicas_Bien,
-                                            //Valor S/.
-                                            valor: formatNumber(item.floValor_Bien, 2),
-                                        };
-
-                                        if (item.intId_Bien == 2) {
-                                            dicMuebles["bien"] = "Vehiculo";
-                                        } else if (item.intId_Bien == 3) {
-                                            dicMuebles["bien"] = "Otro";
-                                        }
-                                        listaMuebles.push(dicMuebles);
-                                        break;
-                                    }
-
-                                });
-                                
-                                imprimeDato("lblMuebles", listaMuebles);
-                                imprimeDato("lblInmuebles", listaInmuebles);
-                            }
-
+                        }, 
+                        error: function (xhr, status, error) {
+                            imprimeDato("ingresos","error");
                         },
                     });
-                }
-                //
 
 
-                /* candidato acreencias - obligaciones */
-                if (objCandidato.strEgresos == '1') {
+                    /* candidato bienes inmuebles - muebles */
+                    if (objCandidato.strInmuebles == '1' || objCandidato.strMuebles == '1') {
+                        $.ajax({
+                            url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/BienesListarPorCandidato",
+                            data: '{"objCandidatoBE":' + JSON.stringify(objCandidatoBE) + '}',
+                            dataType: "json",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            success: function (jsondata) {
+
+                                if (jsondata.d) {
+
+                                    var listaMuebles = [];
+                                    var listaInmuebles = [];
+
+                                    $.each(jsondata.d, function (i, item) {
+                                        switch (item.intId_Bien) {
+                                        case 1:
+                                            //inmuebles
+                                            var dicInmuebles = {
+                                                //Tipo de bien
+                                                tipo: item.strNombre_Bien,
+                                                direccion: item.strDescripcion_Bien,
+                                                //N° Ficha - Reg. público
+                                                registro: item.strCaracteristicas_Bien,
+                                                //Valor autovaluo S/.
+                                                valor: formatNumber(item.floValor_Bien, 2),
+                                            };
+
+                                            listaInmuebles.push(dicInmuebles);
+                                            break;
+                                        case 2:
+                                        case 3:
+                                            //muebles (vehiculo - otros)
+
+                                            var dicMuebles ={
+                                                //Tipo de bien
+                                                tipo: item.strNombre_Bien,
+                                                //Descripción / Marca-Modelo-Año
+                                                descripcion: item.strDescripcion_Bien,
+                                                //Placa / Caracteristicas
+                                                caracteristicas: item.strCaracteristicas_Bien,
+                                                //Valor S/.
+                                                valor: formatNumber(item.floValor_Bien, 2),
+                                            };
+
+                                            if (item.intId_Bien == 2) {
+                                                dicMuebles["bien"] = "Vehiculo";
+                                            } else if (item.intId_Bien == 3) {
+                                                dicMuebles["bien"] = "Otro";
+                                            }
+                                            listaMuebles.push(dicMuebles);
+                                            break;
+                                        }
+
+                                    });
+                                    
+                                    imprimeDato("lblMuebles", listaMuebles);
+                                    imprimeDato("lblInmuebles", listaInmuebles);
+                                }
+
+                            },
+                        });
+                    }
+
+                    /* candidato acreencias - obligaciones */
+                    if (objCandidato.strEgresos == '1') {
+                        $.ajax({
+                            url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/EgresosListarPorCandidato",
+                            data: '{"objCandidatoBE":' + JSON.stringify(objCandidatoBE) + '}',
+                            dataType: "json",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            success: function (jsondata) {
+
+                                if (jsondata.d) {
+
+                                    var listaAcreencias = [];
+
+                                    $.each(jsondata.d, function (i, item) {
+
+                                        var dicAcreencias = {
+                                            //Detalle de la acreencia
+                                            detalle: item.strDetalleAcreencia,
+                                            //Monto S/.
+                                            monto: formatNumber(item.floTotalDeuda, 2),
+                                        };
+
+                                        listaAcreencias.push(dicAcreencias);
+
+                                    });
+                                    imprimeDato("lblAcreencias", listaAcreencias);
+                                }
+
+                            }, 
+                            error: function (xhr, status, error) {
+                                imprimeDato("lblAcreencias", "error")
+                            },
+                        });
+                    } else if (objCandidato.strEgresos == '0' || objCandidato.strEgresos == '') {
+                        imprimeDato("lblAcreencias",'No registró información.')
+                    }
+                    //
+
+                    /* anotacion marginal */
+                    objCandidatoBE.intEstado = 1;
+
                     $.ajax({
-                        url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/EgresosListarPorCandidato",
+                        url: "http://200.48.102.67/pecaoe/servicios/simulador.asmx/Soporte_CandidatoAnotMarginal",
                         data: '{"objCandidatoBE":' + JSON.stringify(objCandidatoBE) + '}',
                         dataType: "json",
                         type: "POST",
                         contentType: "application/json; charset=utf-8",
                         success: function (jsondata) {
 
+                            var itemAnotacion = 0;
+
                             if (jsondata.d) {
-
-                                var listaAcreencias = [];
-
+                                var listaAnotaciones = [];
                                 $.each(jsondata.d, function (i, item) {
-
-                                    var dicAcreencias = {
-                                        //Detalle de la acreencia
-                                        detalle: item.strDetalleAcreencia,
-                                        //Monto S/.
-                                        monto: formatNumber(item.floTotalDeuda, 2),
+                                    itemAnotacion += 1;
+                                    var dicAnotaciones = {
+                                        referencia: item.strReferencia,
+                                        //Anotación Marginal
+                                        anotacion: item.strObservacionCompleto,
                                     };
 
-                                    listaAcreencias.push(dicAcreencias);
-
+                                    listaAnotaciones.push(dicAnotaciones);
                                 });
-                                imprimeDato("lblAcreencias", listaAcreencias);
+                                imprimeDato("lblAnotaciones", listaAnotaciones);
                             }
 
+                            if (itemAnotacion == 0) { imprimeDato("lblAnotaciones",'No cuenta con observaciones') }
+
                         }, error: function (xhr, status, error) {
-                            imprimeDato("lblAcreencias",'No se pudo obtener la información, vuelva a  intentar.')
+                            imprimeDato("lblAnotaciones", "error")
                         }
                     });
-                } else if (objCandidato.strEgresos == '0' || objCandidato.strEgresos == '') {
-                    imprimeDato("lblAcreencias",'No registró información.')
+
+
                 }
-                //
-
-                /* anotacion marginal */
-
-                
-
-                objCandidatoBE.intEstado = 1;
-
-                $.ajax({
-                    url: "http://200.48.102.67/pecaoe/servicios/simulador.asmx/Soporte_CandidatoAnotMarginal",
-                    data: '{"objCandidatoBE":' + JSON.stringify(objCandidatoBE) + '}',
-                    dataType: "json",
-                    type: "POST",
-                    contentType: "application/json; charset=utf-8",
-                    success: function (jsondata) {
-
-                        var itemAnotacion = 0;
-
-                        if (jsondata.d) {
-                            var listaAnotaciones = [];
-                            $.each(jsondata.d, function (i, item) {
-                                itemAnotacion += 1;
-                                var dicAnotaciones = {
-                                    referencia: item.strReferencia,
-                                    //Anotación Marginal
-                                    anotacion: item.strObservacionCompleto,
-                                };
-
-                                listaAnotaciones.push(dicAnotaciones);
-                            });
-                            imprimeDato("lblAnotaciones", listaAnotaciones);
-                        }
-
-                        if (itemAnotacion == 0) { imprimeDato("lblAnotaciones",'No cuenta con observaciones') }
-
-                    }, error: function (xhr, status, error) {
-                        imprimeDato("lblAnotaciones",'No se pudo obtener la información, vuelva a  intentar.')
-                    }
-                });
-
-
             }
-        },
-    });
 
-    return lista_datos;
-};
-//End scrap function
+        }});
+
+           return lista_datos;
+          };
+    //End scrap function

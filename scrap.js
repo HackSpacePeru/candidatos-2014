@@ -599,27 +599,20 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                         success: function (jsondata) {
 
                             if (jsondata.d) {
+                                
+                                var listaOtraExperiencia = [];
+
                                 $.each(jsondata.d, function (i, item) {
-                                    var str = '';
+                                    
+                                    var dicOtraExperiencia = {
+                                        cargo: item.strCargo,
+                                        entidad: item.strInstitucion,
+                                        periodo: (item.intAnio_Inicio + ' - ' + (item.intAnio_Final == 0 ? strMsgHastaActualidad : item.intAnio_Final)),
+                                    };
 
-                                    str += '<tr>';
-                                    str += '<th>Cargo</th>';
-                                    str += '<td>' + item.strCargo + '</td>';
-                                    str += '<th>Entidad</th>';
-                                    str += '<td>' + item.strInstitucion + '</td>';
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Periodo</th>';
-                                    str += '<td colspan="3">' + item.intAnio_Inicio + ' - ' + (item.intAnio_Final == 0 ? strMsgHastaActualidad : item.intAnio_Final) + '</td>';
-                                    str += '</tr>';
-
-                                    str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-
-                                    $('#tblAdicional').append(str);
-                                    $('#tblAdicional').show();
-
+                                    listaOtraExperiencia.push(dicOtraExperiencia);
                                 });
+                                imprimeDato("lblOtraExperiencia",listaOtraExperiencia);
                             }
 
                         }, error: function (xhr, status, error) {
@@ -629,8 +622,6 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                 } else if (objCandidato.strExperienciaOtra == '0' || objCandidato.strExperienciaOtra == '') {
                     imprimeDato("lblOtraExperiencia",'No registró información.')
                 }
-
-                //console.log(objCandidato.strIngresos);
 
                 /* candidato ingresos */
                 if (objCandidato.strIngresos == '1') {

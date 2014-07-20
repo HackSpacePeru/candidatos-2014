@@ -399,34 +399,28 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
                     success: function (jsondata) {
+                        if (jsondata.d) {
+                            
+                            var listaCargosParidarios = [];
 
+                            $.each(jsondata.d, function (i, item) {
+                                var str = '';
+                                dicCargosPartidarios = {
+                                    orgPolitica:  item.strOrganizacionPolitica,
+                                    ambito:  item.objAmbitoBE.strAmbito,
+                                    cargo: item.strNombre_Cargo,
+                                    periodo: (item.intAnio_Inicio + ' - ' + (item.intAnio_Final == 0 ? strMsgHastaActualidad : item.intAnio_Final)),
+                                };
+
+                                listaCargosParidarios.push(dicCargosPartidarios);
+                            });
+                        }
                         if (jsondata.d.length == 0) {
                             imprimeDato("lblCargosPartidarios",'No cuenta con cargos partidarios.')
                         }
+                        else{
+                            imprimeDato("lblCargosPartidarios", listaCargosParidarios)}
 
-                        if (jsondata.d) {
-                            $.each(jsondata.d, function (i, item) {
-                                var str = '';
-
-                                str += '<tr>';
-                                str += '<th style="width:20%;">Organización Política</th>';
-                                str += '<td style="width:30%;">' + item.strOrganizacionPolitica + '</td>';
-                                str += '<th style="width:20%;">Ámbito o circunscripción</th>';
-                                str += '<td style="width:30%;">' + item.objAmbitoBE.strAmbito + '</td>';
-                                str += '</tr>';
-                                str += '<tr>';
-                                str += '<th>Cargo</th>';
-                                str += '<td>' + item.strNombre_Cargo + '</td>';
-                                str += '<th>Periodo</th>';
-                                str += '<td>' + item.intAnio_Inicio + ' - ' + (item.intAnio_Final == 0 ? strMsgHastaActualidad : item.intAnio_Final) + '</td>';
-                                str += '</tr>';
-                                str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-
-                                $('#tblCargoPartidario').append(str);
-                                $('#tblCargoPartidario').show();
-
-                            });
-                        }
                     }, error: function (xhr, status, error) {
                         imprimeDato("lblCargosPartidarios",'No se pudo obtener la información, vuelva a  intentar.')
                     }
@@ -443,10 +437,10 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     success: function (jsondata) {
 
                         if (jsondata.d) {
+                            
+                            var listaCargoEleccion = [];
+
                             $.each(jsondata.d, function (i, item) {
-                                if (jsondata.d.length == 0) {
-                                    imprimeDato("lblCargosEleccion",'No cuenta con cargos de elección popular.')
-                                }
 
                                 var str = '';
                                 var _dep = "";
@@ -459,36 +453,26 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                 if (item.objUbigeoCargoPopularBE.strDistrito != "") { _dis = " - " + item.objUbigeoCargoPopularBE.strDistrito }
                                 if (item.strCentroPoblado != "") { _pob = " - " + item.strCentroPoblado }
 
-                                str += '<tr>';
-                                str += '<th>Organizacion Política por la que postuló</th>';
-                                str += '<td>' + item.strOrganizacionPolitica + '</td>';
-                                str += '<th>Ámbito</th>';
-                                str += '<td>' + item.objAmbitoBE.strAmbito + '</td>';
-                                str += '</tr>';
+                                var dicCargoEleccion ={
+                                    orgPolitica: item.strOrganizacionPolitica,
+                                    ambito: item.objAmbitoBE.strAmbito,
+                                    lugar: (_dep + _pro + _dis + _pob),
+                                    procesoElectoral: item.strProcesoElectoral,
+                                    periodo: (item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal)),
+                                };
 
-                                str += '<tr>';
-                                str += '<th>Cargo</th>';
                                 if (item.objAmbitoBE.intIdAmbito == 6) {
-                                    str += '<td>' + item.strOtroCargo + '</td>';
+                                    dicCargoEleccion["cargo"] = item.strOtroCargo;
                                 } else {
-                                    str += '<td>' + item.objCargoAutoridadBE.strCargoAutoridad + '</td>';
+                                    dicCargoEleccion["cargo"] =item.objCargoAutoridadBE.strCargoAutoridad;
                                 }
-                                str += '<th>Lugar</th>';
-                                str += '<td>' + _dep + _pro + _dis + _pob + '</td>';
-                                str += '</tr>';
-
-                                str += '<tr>';
-                                str += '<th>Proceso Electoral</th>';
-                                str += '<td>' + item.strProcesoElectoral + '</td>';
-                                str += '<th>Periodo</th>';
-                                str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>';
-                                str += '</tr>';
-                                str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-
-                                $('#tblCargoEleccion').append(str);
-                                $('#tblCargoEleccion').show();
+                                listaCargoEleccion.push(dicCargoEleccion);
 
                             });
+                            if (jsondata.d.length == 0) {
+                                imprimeDato("lblCargosEleccion",'No cuenta con cargos de elección popular.');}
+                            else{
+                            imprimeDato("lblCargosEleccion",listaCargoEleccion);}
                         }
 
                     }, error: function (xhr, status, error) {

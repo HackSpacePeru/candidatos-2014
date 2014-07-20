@@ -556,41 +556,31 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     contentType: "application/json; charset=utf-8",
                     success: function (jsondata) {
 
-                        if (jsondata.d.length == 0) {
-                            $('#tblAmbitoCivil').parent().parent().parent().parent().removeClass('tblVacio');
-                            imprimeDato("lblAmbitoCivil",'No cuenta con antecedentes civiles.')
-                        }
+                        var listaCivil = [];
 
                         if (jsondata.d) {
                             $.each(jsondata.d, function (i, item) {
-                                var str = '';
+                                
+                                var dicCivil = {
+                                    materia: item.objTipoMateriaBE.strMateria,
+                                    //Número de expediente
+                                    expediente: item.strExpediente,
+                                    juzgado:  item.strJuzgado,
+                                    //Materia de la demanda
+                                    materia: item.strMateria,
+                                    fallo: item.strFallo,
+                                };
 
-                                str += '<tr>';
-                                str += '<th>Materia</th>';
-                                str += '<td>' + item.objTipoMateriaBE.strMateria + '</td>';
-                                str += '<th>Número de expediente</th>';
-                                str += '<td>' + item.strExpediente + '</td>';
-                                str += '</tr>';
-
-                                str += '<tr>';
-                                str += '<th>Juzgado</th>';
-                                str += '<td>' + item.strJuzgado + '</td>';
-                                str += '<th>Materia de la demanda</th>';
-                                str += '<td>' + item.strMateria + '</td>';
-                                str += '</tr>';
-
-                                str += '<tr>';
-                                str += '<th>Fallo</th>';
-                                str += '<td colspan="3">' + item.strFallo + '</td>';
-                                str += '</tr>';
-
-                                str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-
-                                $('#tblAmbitoCivil').append(str);
-                                $('#tblAmbitoCivil').show();
-
+                                listaCivil.push(dicCivil);
                             });
                         }
+
+                        if (jsondata.d.length == 0) {
+                            imprimeDato("lblAmbitoCivil",'No cuenta con antecedentes civiles.');
+                        }
+                        else{
+                        imprimeDato("lblAmbitoCivil", listaCivil);}
+
 
                     }, error: function (xhr, status, error) {
                         imprimeDato("lblAmbitoCivil",'No se pudo obtener la información, vuelva a  intentar.')

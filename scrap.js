@@ -22,6 +22,16 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
         lista_datos[tipo] = cadena;
     };
 
+    var formatNumber = function formatNumber(number, decimal) {
+        return parseFloat(Math.round(number * 100) / 100).toFixed(decimal);
+    };
+    
+    //Beh, no hace daño
+    String.prototype.right = function (n) {
+        return this.substr((this.length - n), this.length);
+    };
+
+
     idCandidato = idCandidato.toString();
     idProceso = idProceso.toString();
     idOrgPolitica = idOrgPolitica.toString();
@@ -740,28 +750,23 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                         contentType: "application/json; charset=utf-8",
                         success: function (jsondata) {
 
-                            if (jsondata.d.length == 0) {
-                                $('#tblEgreso').parent().parent().parent().parent().removeClass('tblVacio');
-                            }
-
                             if (jsondata.d) {
+
+                                var listaAcreencias = [];
+
                                 $.each(jsondata.d, function (i, item) {
 
-                                    var str = '';
+                                    var dicAcreencias = {
+                                        //Detalle de la acreencia
+                                        detalle: item.strDetalleAcreencia,
+                                        //Monto S/.
+                                        monto: formatNumber(item.floTotalDeuda, 2),
+                                    };
 
-                                    str += '<tr>';
-                                    str += '<th>Detalle de la acreencia</th>';
-                                    str += '<td>' + item.strDetalleAcreencia + '</td>';
-                                    str += '<th>Monto S/.</th>';
-                                    str += '<td>' + formatNumber(item.floTotalDeuda, 2) + '</td>';
-                                    str += '</tr>';
-
-                                    str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-
-                                    $('#tblEgreso').append(str);
-                                    $('#tblEgreso').show();
+                                    listaAcreencias.push(dicAcreencias);
 
                                 });
+                                imprimeDato("lblAcreencias", listaAcreencias);
                             }
 
                         }, error: function (xhr, status, error) {
@@ -773,9 +778,9 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                 }
                 //
 
-                /* anotacion narginal */
+                /* anotacion marginal */
 
-                var itemAnotacion = 0;
+                
 
                 objCandidatoBE.intEstado = 1;
 
@@ -787,29 +792,21 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     contentType: "application/json; charset=utf-8",
                     success: function (jsondata) {
 
+                        var itemAnotacion = 0;
+
                         if (jsondata.d) {
+                            var listaAnotaciones = [];
                             $.each(jsondata.d, function (i, item) {
-
                                 itemAnotacion += 1;
+                                var dicAnotaciones = {
+                                    referencia: item.strReferencia,
+                                    //Anotación Marginal
+                                    anotacion: item.strObservacionCompleto,
+                                };
 
-                                var str = '';
-
-                                str += '<tr>';
-                                str += '<th>Referencia</th>';
-                                str += '<td>' + item.strReferencia + '</td>';
-                                str += '</tr>';
-
-                                str += '<tr>';
-                                str += '<th>Anotación Marginal</th>';
-                                str += '<td>' + item.strObservacionCompleto + '</td>';
-                                str += '</tr>';
-
-                                str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-
-                                $('#tblObservaciones').append(str);
-                                $('#tblObservaciones').show();
-
+                                listaAnotaciones.push(dicAnotaciones);
                             });
+                            imprimeDato("lblAnotaciones", listaAnotaciones);
                         }
 
                         if (itemAnotacion == 0) { imprimeDato("lblAnotaciones",'No cuenta con observaciones') }
@@ -822,30 +819,8 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
 
             }
         },
-        error: function (xhr, status, error) {
-            $("#divAlert").dialog('open');
-            $("#spnAlert").empty().html(xhr.responseText);
-        }
     });
 
-/*
-    var all_done=0;
-
-    while(! all_done){
-    $(document).ajaxStop(
-        function done(){all_done=1;});
-    }
-*/
     return lista_datos;
 };
-// end document ready
-
-String.prototype.right = function (n) {
-    return this.substr((this.length - n), this.length);
-};
-
-
-
-function formatNumber(number, decimal) {
-    return parseFloat(Math.round(number * 100) / 100).toFixed(decimal);
-}
+//End scrap function

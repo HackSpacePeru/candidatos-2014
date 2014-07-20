@@ -45,42 +45,13 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
         dataType: "json",
         type: "POST",
         contentType: "application/json; charset=utf-8",
+        async: false,
         success: function (jsondata) {
             if (jsondata.d) {
                 var str = '';
 
                 var objCandidato = new Object();
                 objCandidato = jsondata.d;
-
-                //Foto
-                $.ajax({
-                    url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/CandidatoFotoListarPorID",
-                    data: '{"objCandidatoBE":' + JSON.stringify(objCandidatoBE) + '}',
-                    dataType: "json",
-                    type: "POST",
-                    contentType: "application/json; charset=utf-8",
-                    async: false,
-                    success: function (jsondata) {
-                        if (jsondata.d) {
-
-                            var objCandidatoFoto = new Object();
-                            objCandidatoFoto = jsondata.d;
-
-                            if (objCandidatoFoto.strArchivo != '' && objCandidatoFoto.strArchivo != null) {
-                                imprimeDato("imgFoto",'')
-                                intFotoEncontrada = 1;
-                                if (objCandidatoFoto.strFotoPadron == '0') {
-                                    $('#fotoCandidato').attr('src', '../06FOTOS/2014/' + objCandidatoFoto.strArchivo);
-                                } else {
-                                    MostrarFotoDNI(objCandidato.strDNI, false);
-                                }
-                            }
-
-                        }
-                    }, error: function (xhr, status, error) {
-
-                    }
-                });
 
                 // Datos principales
                 imprimeDato("txNroRegistro",objCandidato.strRegistro_Org_Pol)
@@ -112,24 +83,12 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                 imprimeDato("txtLugarDistritoRes",objCandidato.objUbigeoResidenciaBE.strDistrito)
                 imprimeDato("txtTiempoRes",objCandidato.strTiempo_Residencia + ' años')
 
-                if (objCandidato.strExperiencia == 0) { imprimeDato("lblExperiencia",'No cuenta con experiencia laboral.') }
-                if (objCandidato.strEducacionPrimaria == 0) { imprimeDato("lblEducacionPrimaria",'No cuenta con educación primaria.') }
-                if (objCandidato.strEducacionSecundaria == 0) { imprimeDato("lblEducacionSecundaria",'No cuenta con educacion secundaria.') }
-                if (objCandidato.strEducacionTecnico == 0) { imprimeDato("lblEducacionTecnico",'No cuenta con educación técnica.') }
-                if (objCandidato.strEducacionUniversitario == 0) { imprimeDato("lblEducacionUniversitario",'No cuenta con educación universitaria.') }
-                if (objCandidato.strEducacionPostgrado == 0) { imprimeDato("lblEducacionPostgrado",'No cuenta con educación en postgrado.') }
-                if (objCandidato.strCargo_Partidario == 0) { imprimeDato("lblCargosPartidarios",'No cuenta con cargos partidarios.') }
+                               
                 if (objCandidato.strCargo_Eleccion == 0) { imprimeDato("lblCargosEleccion",'No cuenta con cargos de elección popular.') }
-                if (objCandidato.strVinculo_ROP == 0) { imprimeDato("lblMilitancia",'No cuenta con militancia en otros partidos.') }
-                if (objCandidato.strAntecedente_Penal == 0) { imprimeDato("lblAmbitoPenal",'No cuenta con antecedentes penales.') }
-                if (objCandidato.strAntecedente_Civil == 0) { imprimeDato("lblAmbitoCivil",'No cuenta con antecedentes civiles.') }
-                if (objCandidato.strExperienciaOtra == 0) { imprimeDato("lblOtraExperiencia",'No registró información.') }
-
                 if (objCandidato.strInmuebles == 0 || objCandidato.strInmuebles == '') { imprimeDato("lblInmuebles",'No registró información.') }
                 if (objCandidato.strMuebles == 0 || objCandidato.strMuebles == '') { imprimeDato("lblMuebles",'No registró información.') }
 
-                if (objCandidato.strEgresos == 0 || objCandidato.strEgresos == '') { imprimeDato("lblAcreencias",'No registró información.') }
-
+                
                 /* candidato familia */
                 $.ajax({
                     url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/CandidatoFamiliaListarPorCandidato",
@@ -154,10 +113,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                 }
                             });
                         }
-                    }, error: function (xhr, status, error) {
-                        $("#divAlert").dialog('open');
-                        $("#spnAlert").empty().html(xhr.responseText);
-                    }
+                    },
                 });
 
 
@@ -170,14 +126,8 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     contentType: "application/json; charset=utf-8",
                     success: function (jsondata) {
 
-                        if (jsondata.d.length == 0) {
-                            $('#tblExperiencia').parent().parent().parent().parent().removeClass('tblVacio');
-                        }
-
-                        if (jsondata.d.length >= 1) {
-
-                        } else {
-                            imprimeDato("lblExperiencia",'No cuenta con experiencia laboral.')
+                        if (jsondata.d.length < 1){
+                            imprimeDato("lblExperiencia",'No cuenta con experiencia laboral.');
                         }
 
                         if (jsondata.d) {
@@ -342,7 +292,12 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             var itemcountTec = 0;
                             var itemcountUni = 0;
                             var itemcountPos = 0;
-
+                            
+                            //--
+                            var listaTecnico = [];
+                            var listaUniversitario = [];
+                            var listaPostgrado = [];
+                            //--
 
                             $.each(jsondata.d, function (i, item) {
                                 var str = '';
@@ -355,151 +310,75 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                 case 1:
                                     //tecnico
                                     itemcountTec += 1;
-
-                                    str += '<tr>';
-                                    str += '<th>Nombre del centro de estudios</th>'
-                                    str += '<td>' + item.strNombreCentro + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Lugar</th>'
-                                    if (item.strFgExtranjero == 1) {
-                                        str += '<td>' + item.strPais + '</td>';
-                                    } else {
-                                        str += '<td>' + item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito + '</td>';
+                                    //--
+                                    var dicTecnico = {
+                                        instEducativa:  item.strNombreCentro,
+                                        Especialidad:  item.strNombreEstudio,
+                                        curso:  item.strNombreCarrera,
+                                        concluido: (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido'),
+                                        periodo: (item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal)),
                                     }
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Especialidad</th>'
-                                    str += '<td>' + item.strNombreEstudio + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Curso</th>'
-                                    str += '<td>' + item.strNombreCarrera + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Estado</th>'
-                                    str += '<td>' + (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido') + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Periodo</th>'
-                                    str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>'
-                                    str += '</tr>';
-                                    str += '<tr><td colspan="2" class="separatorItem">&nbsp;</td></tr>';
-
-                                    $('#tblTecnico').append(str);
-                                    $('#tblTecnico').show();
-
+                                    if (item.strFgExtranjero == 1) {
+                                        dicTecnico["lugar"] =  item.strPais;
+                                    } else {
+                                        dicTecnico["lugar"] = (item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito);
+                                    }
+                                    listaTecnico.push(dicTecnico);
+                                    //--
                                     break;
                                 case 3:
                                     //universitario
                                     itemcountUni += 1;
-                                    str += '<tr>';
-                                    str += '<th>Nombre de la universidad</th>'
-                                    str += '<td>' + item.strNombreCentro + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Lugar</th>'
-                                    if (item.strFgExtranjero == 1) {
-                                        str += '<td>' + item.strPais + '</td>';
-                                    } else {
-                                        str += '<td>' + item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito + '</td>';
+                                    //--
+                                    var dicUniversitario = {
+                                        instEducativa:  item.strNombreCentro,
+                                        facultad:  item.strNombreEstudio,
+                                        carrera:  item.strNombreCarrera,
+                                        concluido: (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido'),
+                                        periodo: (item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal)),
+                                        tipoGrado: item.strTipoGrado,
                                     }
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Nombre de la facultad</th>'
-                                    str += '<td>' + item.strNombreEstudio + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Carrera</th>'
-                                    str += '<td>' + item.strNombreCarrera + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Estado</th>'
-                                    str += '<td>' + (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido') + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Grado / Título</th>'
-                                    str += '<td>' + item.strTipoGrado + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Periodo</th>'
-                                    str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>'
-                                    str += '</tr>';
-                                    str += '<tr><td colspan="2" class="separatorItem">&nbsp;</td></tr>';
-
-                                    $('#tblUniversitario').append(str);
-                                    $('#tblUniversitario').show();
-
+                                    if (item.strFgExtranjero == 1) {
+                                        dicUniversitario["lugar"] =  item.strPais;
+                                    } else {
+                                        dicUniversitario["lugar"] = (item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito);
+                                    }
+                                    listaUniversitario.push(dicUniversitario);
+                                    //--
                                     break;
                                 case 4:
                                     //postgrado
                                     itemcountPos += 1;
-
-                                    str += '<tr>';
-                                    str += '<th>Tipo</th>'
+                                    //--
+                                    var dicPostgrado = {
+                                        instEducativa: item.strNombreCentro,
+                                        Especialidad:  item.strNombreEstudio,
+                                        concluido: (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido'),
+                                        periodo: (item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal)),
+                                        tipoGrado: item.strTipoGrado 
+                                    }
 
                                     if (item.intTipoPostgrado == 1) {
-                                        str += '<td>Maestria</td>';
+                                        dicPostgrado["tipo"] = "Maestria";
                                     } else if (item.intTipoPostgrado == 2) {
-                                        str += '<td>Doctorado</td>';
+                                        dicPostgrado["tipo"] = "Doctorado";
                                     } else if (item.intTipoPostgrado == 3) {
-                                        str += '<td>' + item.strOtroTipoDocumento + '</td>';
+                                        dicPostgrado["tipo"] = item.strOtroTipoDocumento;
                                     }
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Nombre del centro de estudios</th>'
-                                    str += '<td>' + item.strNombreCentro + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Lugar:</th>'
                                     if (item.strFgExtranjero == 1) {
-                                        str += '<td>' + item.strPais + '</td>';
+                                        dicPostgrado["lugar"] =  item.strPais;
                                     } else {
-                                        str += '<td>' + item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito + '</td>';
+                                        dicPostgrado["lugar"] = (item.strPais + ' - ' + item.objUbigeoBE.strDepartamento + ' - ' + item.objUbigeoBE.strProvincia + ' - ' + item.objUbigeoBE.strDistrito);
                                     }
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Especialidad</th>'
-                                    str += '<td>' + item.strNombreEstudio + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Estado</th>'
-                                    str += '<td>' + (item.strFgConcluido == '1' ? 'Concluido' : 'No concluido') + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Grado/Titulo</th>'
-                                    str += '<td>' + item.strTipoGrado + '</td>'
-                                    str += '</tr>';
-
-                                    str += '<tr>';
-                                    str += '<th>Periodo</th>'
-                                    str += '<td>' + item.intAnioInicio + ' - ' + (item.intAnioFinal == 0 ? strMsgHastaActualidad : item.intAnioFinal) + '</td>'
-                                    str += '</tr>';
-                                    str += '<tr><td colspan="2" class="separatorItem">&nbsp;</td></tr>';
-
-                                    $('#tblPostgrado').append(str);
-                                    $('#tblPostgrado').show();
+                                    listaPostgrado.push(dicPostgrado);
+                                    //--
                                     break;
                                 }
 
                             });
-
+                            imprimeDato("lblEducacionTecnico",listaTecnico);
+                            imprimeDato("lblEducacionUniversitario",listaUniversitario);
+                            imprimeDato("lblEducacionPostgrado",listaPostgrado);
                             if (itemcountTec < 1) { imprimeDato("lblEducacionTecnico",'No cuenta con educación técnica.') }
                             if (itemcountUni < 1) { imprimeDato("lblEducacionUniversitario",'No cuenta con educación universitaria.') }
                             if (itemcountPos < 1) { imprimeDato("lblEducacionPostgrado",'No cuenta con educación en postgrado.') }
@@ -1044,23 +923,4 @@ String.prototype.right = function (n) {
 
 function formatNumber(number, decimal) {
     return parseFloat(Math.round(number * 100) / 100).toFixed(decimal);
-}
-
-function MostrarFotoDNI(strDNI, blnRegistraFoto) {
-    var objCandidatoNewBE = new Object();
-    objCandidatoNewBE.strDNI = strDNI;
-    $.ajax({
-        url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/ObtenerRutaFotoDNI",
-        data: '{"objCandidatoBE":' + JSON.stringify(objCandidatoNewBE) + '}',
-        dataType: "json",
-        type: "POST",
-        contentType: "application/json; charset=utf-8",
-        success: function (jsondata) {
-            $('#fotoCandidato').attr('src', jsondata.d[0]);
-        },
-        error: function (xhr, status, error) {
-            $("#divAlert").dialog('open');
-            $("#spnAlert").empty().html(xhr.responseText);
-        }
-    });
 }

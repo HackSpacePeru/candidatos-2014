@@ -516,41 +516,30 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     contentType: "application/json; charset=utf-8",
                     success: function (jsondata) {
                         if (jsondata.d) {
-
-                            if (jsondata.d.length == 0) {
-                                $('#tblAmbitoPenal').parent().parent().parent().parent().removeClass('tblVacio');
-                                imprimeDato("lblAmbitoPenal",'No cuenta con antecedentes penales.')
-                            }
+                            
+                            var listaPenal = [];
 
                             $.each(jsondata.d, function (i, item) {
-                                var str = '';
+                                
+                                var dicPenal = {
+                                    //Número de expediente
+                                    expediente: item.strExpediente,
+                                    //Fecha de sentencia firme
+                                    fechaSentencia: (item.strFecha_Sentencia.substring(0, 2) + '/' + item.strFecha_Sentencia.substring(2, 4) + '/' + item.strFecha_Sentencia.substring(4, 8)),
+                                    juzgado: item.strJuzagado,
+                                    delito: item.strAcusacion_Penal,
+                                    fallo: item.strFallo,
+                                };
 
-                                str += '<tr>';
-                                str += '<th>Número de expediente</th>';
-                                str += '<td>' + item.strExpediente + '</td>';
-                                str += '<th>Fecha de sentencia firme</th>';
-                                str += '<td>' + item.strFecha_Sentencia.substring(0, 2) + '/' + item.strFecha_Sentencia.substring(2, 4) + '/' + item.strFecha_Sentencia.substring(4, 8) + '</td>';
-                                str += '</tr>';
-
-                                str += '<tr>';
-                                str += '<th>Juzgado</th>';
-                                str += '<td>' + item.strJuzagado + '</td>';
-                                str += '<th>Delito</th>';
-                                str += '<td>' + item.strAcusacion_Penal + '</td>';
-                                str += '</tr>';
-
-                                str += '<tr>';
-                                str += '<th>Fallo</th>';
-                                str += '<td colspan="3">' + item.strFallo + '</td>';
-                                str += '</tr>';
-
-                                str += '<tr><td colspan="4" class="separatorItem">&nbsp;</td></tr>';
-
-
-                                $('#tblAmbitoPenal').append(str);
-                                $('#tblAmbitoPenal').show();
+                                listaPenal.push(dicPenal);
 
                             });
+
+                            if (jsondata.d.length == 0) {
+                                imprimeDato("lblAmbitoPenal",'No cuenta con antecedentes penales.');
+                            }
+                            else{
+                            imprimeDato("lblAmbitoPenal", listaPenal);}
                         }
 
                     }, error: function (xhr, status, error) {

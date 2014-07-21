@@ -3,6 +3,12 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
 
     //creacion de objeto candidato
     var objCandidatoBE = new Object();
+
+    //Beh, no hace daño
+    String.prototype.right = function (n) {
+        return this.substr((this.length - n), this.length);
+    };
+    //Beh, me da flojera borrarlo
     objCandidatoBE.objProcesoElectoralBE = new Object();
     objCandidatoBE.objOpInscritasBE = new Object();
     objCandidatoBE.objAmbitoBE = new Object();
@@ -11,9 +17,9 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
     objCandidatoBE.objUbigeoNacimientoBE = new Object();
     objCandidatoBE.objUbigeoResidenciaBE = new Object();
     objCandidatoBE.objUsuarioBE = new Object();
+    //--
 
     var strMsgHastaActualidad = 'Hasta la actualidad';
-
 
     var lista_datos = {};
 
@@ -25,29 +31,20 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
     var formatNumber = function formatNumber(number, decimal) {
         return parseFloat(Math.round(number * 100) / 100).toFixed(decimal);
     };
-    
-    //Beh, no hace daño
-    String.prototype.right = function (n) {
-        return this.substr((this.length - n), this.length);
-    };
-
-
-    idCandidato = idCandidato.toString();
-    idProceso = idProceso.toString();
-    idOrgPolitica = idOrgPolitica.toString();
-
     var objPerfilUsuarioBEnew = new Object();
 
     //candidato
-    objCandidatoBE.objOpInscritasBE.intCod_OP = idOrgPolitica;
-    objCandidatoBE.objProcesoElectoralBE.intIdProceso = idProceso;
-    objCandidatoBE.intId_Candidato = idCandidato;
+    objCandidatoBE.objOpInscritasBE.intCod_OP = idOrgPolitica.toString();
+    objCandidatoBE.objProcesoElectoralBE.intIdProceso = idProceso.toString();
+    objCandidatoBE.intId_Candidato = idCandidato.toString();
 
+    //Para borrar
     var objOPInscritasBE = new Object();
     objOPInscritasBE.objProcesoElectoralBE = new Object();
-    objOPInscritasBE.intCod_OP = idOrgPolitica;
-    objOPInscritasBE.objProcesoElectoralBE.intIdProceso = idProceso;
-
+    objOPInscritasBE.intCod_OP = idOrgPolitica.toString();
+    objOPInscritasBE.objProcesoElectoralBE.intIdProceso = idProceso.toString();
+    //--
+    
     //Verifica si existe candidato
     $.ajax({
         url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/CandidatoListarPorID",
@@ -99,14 +96,10 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     departamento: objCandidato.objUbigeoResidenciaBE.strDepartamento,
                     provincia: objCandidato.objUbigeoResidenciaBE.strProvincia,
                     distrito: objCandidato.objUbigeoResidenciaBE.strDistrito,
-                    //Tiempo residencia
-                    tiempo: (objCandidato.strTiempo_Residencia + ' años'),
+                    //Tiempo residencia en años
+                    tiempo: objCandidato.strTiempo_Residencia,
                 };
                 imprimeDato("residencia",dicResidencia);
-
-                if (objCandidato.strInmuebles == 0 || objCandidato.strInmuebles == '') { imprimeDato("lblInmuebles",'No registró información.') }
-                if (objCandidato.strMuebles == 0 || objCandidato.strMuebles == '') { imprimeDato("lblMuebles",'No registró información.') }
-
                 
                 /* candidato familia */
                 $.ajax({
@@ -115,6 +108,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     dataType: "json",
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
+                    async:false,
                     success: function (jsondata) {
                         if (jsondata.d) {
 
@@ -146,10 +140,11 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     dataType: "json",
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
+                    async: false,
                     success: function (jsondata) {
 
                         if (jsondata.d.length < 1){
-                            imprimeDato("lblExperiencia",'No cuenta con experiencia laboral.');
+                            imprimeDato("experienciaLaboral", null);
                         }
 
                         if (jsondata.d) {
@@ -173,23 +168,27 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                 listaExperiencia.push(dic_laboral);
 
                             });
-                            imprimeDato("experiencia",listaExperiencia);
+                            imprimeDato("experienciaLaboral",listaExperiencia);
                         }
                         
-                    }, error: function (xhr, status, error) {
-                        imprimeDato("experiencia",'error');
+                    }, 
+                    error: function (xhr, status, error) {
+                        imprimeDato("experienciaLaboral",'error');
                     }
                 });
 
+                //Educacion
+
                 var dicEducacion = {};
 
-                /* candidato educacion basica */
+                /* candidato educacion basica regular */
                 $.ajax({
                     url: "http://200.48.102.67/pecaoe/servicios/declaracion.asmx/EducacionBasicaListarPorCandidato",
                     data: '{"objCandidatoBE":' + JSON.stringify(objCandidatoBE) + '}',
                     dataType: "json",
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
+                    async:false,
                     success: function (jsondata) {
 
                         if (jsondata.d) {
@@ -197,8 +196,8 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             var itemcountPri = 0;
                             var itemcountSec = 0;
                             //--
-                            var lista_primaria = [];
-                            var lista_secundaria = [];
+                            var listaPrimaria = [];
+                            var listaSecundaria = [];
                             //--
 
                             $.each(jsondata.d, function (i, item) {
@@ -241,7 +240,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                                                 item.objUbigeoPrimaria.strDistrito);                                        
                                     }
                                     itemcountPri+=1;
-                                    lista_primaria.push(dicPrimaria);
+                                    listaPrimaria.push(dicPrimaria);
                                     //--
                                     break;
 
@@ -273,7 +272,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                                                   item.objUbigeoSecundaria.strDistrito);
                                     }
                                     itemcountSec+=1;
-                                    lista_secundaria.push(dicSecundaria);
+                                    listaSecundaria.push(dicSecundaria);
                                     //--
                                     break;
 
@@ -281,21 +280,18 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
 
                             });
 
-                            if (itemcountPri < 1) { imprimeDato("lblEducacionPrimaria",'No cuenta con educación primaria.') }
-                            else { imprimeDato("lblEducacionPrimaria", lista_primaria )}
-                            if (itemcountSec < 1) { imprimeDato("lblEducacionSecundaria",'No cuenta con educacion secundaria.') }
-                            else { imprimeDato("lblEducacionSecundaria", lista_secundaria)}
-                            
-
+                            if (itemcountPri < 1) {dicEducacion["primaria"] = null;}
+                            else {dicEducacion["primaria"] = listaPrimaria;}
+                            if (itemcountSec < 1) {dicEducacion["secundaria"] = null;}
+                            else {dicEducacion["secundaria"] = listaSecundaria;}
                         }
 
                     }, 
                     error: function (xhr, status, error) {
-                        imprimeDato("lblEducacionPrimaria",'error');
-                        imprimeDato("lblEducacionSecundaria",'error');
+                        dicEducacion["primaria"] = "error";
+                        dicEducacion["secundaria"] = "error";
                     }
                 });
-
 
                 /* candidato educacion superior */
                 $.ajax({
@@ -304,6 +300,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     dataType: "json",
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
+                    async:false,
                     success: function (jsondata) {
 
                         if (jsondata.d) {
@@ -393,23 +390,36 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                 }
 
                             });
-                            imprimeDato("lblEducacionTecnico",listaTecnico);
-                            imprimeDato("lblEducacionUniversitario",listaUniversitario);
-                            imprimeDato("lblEducacionPostgrado",listaPostgrado);
-                            if (itemcountTec < 1) { imprimeDato("lblEducacionTecnico",'No cuenta con educación técnica.'); }
-                            if (itemcountUni < 1) { imprimeDato("lblEducacionUniversitario",'No cuenta con educación universitaria.'); }
-                            if (itemcountPos < 1) { imprimeDato("lblEducacionPostgrado",'No cuenta con educación en postgrado.'); }
+                            dicEducacion["tecnico"] = listaTecnico;
+                            dicEducacion["universitario"] = listaUniversitario;
+                            dicEducacion["postgrado"] = listaPostgrado;
+
+                            if (itemcountTec < 1) {
+                                dicEducacion["tecnico"] = null;}
+                            if (itemcountUni < 1) {
+                                dicEducacion["universitario"] = null;}
+                            if (itemcountPos < 1) {
+                                dicEducacion["postgrado"] = null;}
                         }
 
                     },
                     error: function (xhr, status, error) {
-                        imprimeDato("lblEducacionTecnico",'error');
-                        imprimeDato("lblEducacionUniversitario",'error');
-                        imprimeDato("lblEducacionPostgrado",'error');
+                        dicEducacion["tecnico"] = "error";
+                        dicEducacion["universitario"] = "error";
+                        dicEducacion["postgrado"] = "error";
                     }
                 });
 
-                //imprimeDato("educacion",dicEducacion);
+                var boolEducacion = dicEducacion.primaria || dicEducacion.secundaria || dicEducacion.tecnico || dicEducacion.universitario || dicEducacion.postgrado;
+                if(boolEducacion)
+                {imprimeDato("educacion",dicEducacion);}
+                else {imprimeDato("educacion", null);}
+                  
+                //--
+
+
+                //Cargos politicos
+                var dicPolitico = {}
 
                 /* candidato cargos partidarios */
                 $.ajax({
@@ -418,11 +428,12 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     dataType: "json",
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
+                    async:false,
                     success: function (jsondata) {
-                        if (jsondata.d) {
-                            
-                            var listaCargosParidarios = [];
 
+                        var listaCargosPartidarios = [];
+
+                        if (jsondata.d) {
                             $.each(jsondata.d, function (i, item) {
                                 dicCargosPartidarios = {
                                     orgPolitica:  item.strOrganizacionPolitica,
@@ -431,20 +442,16 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                     periodo: (item.intAnio_Inicio + ' - ' + (item.intAnio_Final == 0 ? strMsgHastaActualidad : item.intAnio_Final)),
                                 };
 
-                                listaCargosParidarios.push(dicCargosPartidarios);
+                                listaCargosPartidarios.push(dicCargosPartidarios);
                             });
                         }
-                        if (jsondata.d.length == 0) {
-                            imprimeDato("lblCargosPartidarios",'No cuenta con cargos partidarios.')
-                        }
-                        else{
-                            imprimeDato("lblCargosPartidarios", listaCargosParidarios)}
-
-                    }, error: function (xhr, status, error) {
-                        imprimeDato("lblCargosPartidarios", "error");
+                        if (jsondata.d.length == 0) {dicPolitico["partidario"] = null;}
+                        else{dicPolitico["partidario"] = listaCargosPartidarios;}
+                    },
+                    error: function (xhr, status, error) {
+                        dicPolitico["partidario"] = "error";
                     }
                 });
-
 
                 /* candidato cargo de eleccion popular */
                 $.ajax({
@@ -453,12 +460,12 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     dataType: "json",
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
+                    async:false,
                     success: function (jsondata) {
 
-                        if (jsondata.d) {
-                            
-                            var listaCargoEleccion = [];
+                        var listaCargoEleccion = [];
 
+                        if (jsondata.d) {
                             $.each(jsondata.d, function (i, item) {
                                 var _dep = "";
                                 var _pro = "";
@@ -486,14 +493,15 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                 listaCargoEleccion.push(dicCargoEleccion);
 
                             });
-                            if (jsondata.d.length == 0) {
-                                imprimeDato("lblCargosEleccion",'No cuenta con cargos de elección popular.');}
-                            else{
-                                imprimeDato("lblCargosEleccion",listaCargoEleccion);}
+                            
                         }
+                        if (jsondata.d.length == 0) {dicPolitico["eleccion"] = null;}
+                        else{dicPolitico["eleccion"] = listaCargoEleccion;}
 
-                    }, error: function (xhr, status, error) {
-                        imprimeDato("lblCargosEleccion", "error");
+
+                    },
+                    error: function (xhr, status, error) {
+                        dicPolitico["eleccion"] = "error";
                     }
                 });
 
@@ -504,12 +512,11 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     dataType: "json",
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
+                    async:false,
                     success: function (jsondata) {
+                        var listaRenuncias = [];
                         if (jsondata.d) {
-                            var listaRenuncias = [];
-
                             $.each(jsondata.d, function (i, item) {
-                                
                                 var dicRenuncias ={
                                     //Denominación de la O.P. a la que renunció o cuya inscripción fue cancelada
                                     orgPolitica:  item.strOrgPolitica,
@@ -518,17 +525,21 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                 listaRenuncias.push(dicRenuncias);
                             });
                         }
-                        if (jsondata.d.length == 0) {
-                            imprimeDato("lblMilitancia", 'No cuenta con militancia en otros partidos.');
-                        }
-                        else{
-                            imprimeDato("lblMilitancia", listaRenuncias);}
+                        if (jsondata.d.length == 0) { dicPolitico["militancia"] = null;}
+                        else{ dicPolitico["militancia"] = listaRenuncias;}
                     }, 
                     error: function (xhr, status, error) {
-                        imprimeDato("lblMilitancia", "error");
+                        dicPolitico["militancia"] = "error";
                     },
                 });
 
+                if(dicPolitico["partidario"] || dicPolitico["eleccion"] || dicPolitico["militancia"])
+                {imprimeDato("cargosPoliticos", dicPolitico);}
+                else{ imprimeDato("cargosPoliticos", null);}
+                //--
+
+                //Sentencias
+                var dicSentencias = {};
 
                 /* candidato condenas impuestas */
                 $.ajax({
@@ -537,13 +548,11 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     dataType: "json",
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
+                    async:false,
                     success: function (jsondata) {
                         if (jsondata.d) {
-                            
                             var listaPenal = [];
-
                             $.each(jsondata.d, function (i, item) {
-                                
                                 var dicPenal = {
                                     //Número de expediente
                                     expediente: item.strExpediente,
@@ -553,21 +562,14 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                     delito: item.strAcusacion_Penal,
                                     fallo: item.strFallo,
                                 };
-
                                 listaPenal.push(dicPenal);
-
                             });
-
-                            if (jsondata.d.length == 0) {
-                                imprimeDato("lblAmbitoPenal",'No cuenta con antecedentes penales.');
-                            }
-                            else{
-                                imprimeDato("lblAmbitoPenal", listaPenal);}
+                            if (jsondata.d.length == 0) {dicSentencias["penal"] = null;}
+                            else{dicSentencias["penal"] = listaPenal;}
                         }
-
                     }, 
                     error: function (xhr, status, error) {
-                        imprimeDato("lblAmbitoPenal", "error");
+                        dicSentencias["penal"] = "error";
                     }
                 });
 
@@ -578,13 +580,11 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                     dataType: "json",
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
+                    async:false,
                     success: function (jsondata) {
-
                         var listaCivil = [];
-
                         if (jsondata.d) {
                             $.each(jsondata.d, function (i, item) {
-                                
                                 var dicCivil = {
                                     materia: item.objTipoMateriaBE.strMateria,
                                     //Número de expediente
@@ -599,19 +599,21 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             });
                         }
 
-                        if (jsondata.d.length == 0) {
-                            imprimeDato("lblAmbitoCivil",'No cuenta con antecedentes civiles.');
+                        if (jsondata.d.length == 0) { dicSentencias["civil"] = null;
                         }
-                        else{
-                            imprimeDato("lblAmbitoCivil", listaCivil);}
+                        else{ dicSentencias["civil"] = listaCivil;}
 
 
                     }, 
                     error: function (xhr, status, error) {
-                        imprimeDato("lblAmbitoCivil", "error");
+                        dicSentencias["civil"] = "error";
                     },
                 });
 
+                if(dicSentencias["civil"] || dicSentencias["Penal"])
+                {imprimeDato("sentencias",dicSentencias);}
+                else {imprimeDato("sentencias", null);}
+                //--
 
                 /* candidato otra experiencia */
                 if (objCandidato.strExperienciaOtra == '1') {
@@ -621,6 +623,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                         dataType: "json",
                         type: "POST",
                         contentType: "application/json; charset=utf-8",
+                        async: false,
                         success: function (jsondata) {
 
                             if (jsondata.d) {
@@ -637,16 +640,16 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
 
                                     listaOtraExperiencia.push(dicOtraExperiencia);
                                 });
-                                imprimeDato("lblOtraExperiencia",listaOtraExperiencia);
+                                imprimeDato("otraExperiencia",listaOtraExperiencia);
                             }
 
                         },
                         error: function (xhr, status, error) {
-                            imprimeDato("lblOtraExperiencia", "error");
+                            imprimeDato("otraExperiencia", "error");
                         },
                     });
                 } else if (objCandidato.strExperienciaOtra == '0' || objCandidato.strExperienciaOtra == '') {
-                    imprimeDato("lblOtraExperiencia",'No registró información.')
+                    imprimeDato("otraExperiencia",null);
                 }
 
                 /* candidato ingresos */
@@ -657,6 +660,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                         dataType: "json",
                         type: "POST",
                         contentType: "application/json; charset=utf-8",
+                        async: false,
                         success: function (jsondata) {
 
                             if (jsondata.d) {
@@ -703,9 +707,15 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             dataType: "json",
                             type: "POST",
                             contentType: "application/json; charset=utf-8",
+                            async: false,
                             success: function (jsondata) {
 
                                 if (jsondata.d) {
+
+                                    var dicBienes = {
+                                        muebles: null,
+                                        inmuebles: null,
+                                    };
 
                                     var listaMuebles = [];
                                     var listaInmuebles = [];
@@ -752,8 +762,12 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
 
                                     });
                                     
-                                    imprimeDato("lblMuebles", listaMuebles);
-                                    imprimeDato("lblInmuebles", listaInmuebles);
+                                    if (listaMuebles.length){dicBienes.muebles = listaMuebles;}
+                                    if (listaInmuebles.length){dicBienes.inmuebles = listaInmuebles;}
+
+                                    if(listaMuebles.length || listaInmuebles.length){imprimeDato("bienes", dicBienes);}
+                                    else{imprimeDato("bienes", null);}
+
                                 }
 
                             },
@@ -768,6 +782,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                             dataType: "json",
                             type: "POST",
                             contentType: "application/json; charset=utf-8",
+                            async: false,
                             success: function (jsondata) {
 
                                 if (jsondata.d) {
@@ -786,21 +801,20 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                                         listaAcreencias.push(dicAcreencias);
 
                                     });
-                                    imprimeDato("lblAcreencias", listaAcreencias);
+                                    imprimeDato("acreencias", listaAcreencias);
                                 }
 
                             }, 
                             error: function (xhr, status, error) {
-                                imprimeDato("lblAcreencias", "error")
+                                imprimeDato("acreencias", "error")
                             },
                         });
                     } else if (objCandidato.strEgresos == '0' || objCandidato.strEgresos == '') {
-                        imprimeDato("lblAcreencias",'No registró información.')
+                        imprimeDato("acreencias", null);
                     }
                     //
 
                     /* anotacion marginal */
-                    objCandidatoBE.intEstado = 1;
 
                     $.ajax({
                         url: "http://200.48.102.67/pecaoe/servicios/simulador.asmx/Soporte_CandidatoAnotMarginal",
@@ -808,6 +822,7 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
                         dataType: "json",
                         type: "POST",
                         contentType: "application/json; charset=utf-8",
+                        async: false,
                         success: function (jsondata) {
 
                             var itemAnotacion = 0;
@@ -824,17 +839,20 @@ var scrap = function scrap (idCandidato, idProceso, idOrgPolitica) {
 
                                     listaAnotaciones.push(dicAnotaciones);
                                 });
-                                imprimeDato("lblAnotaciones", listaAnotaciones);
+                                imprimeDato("observaciones", listaAnotaciones);
                             }
 
-                            if (itemAnotacion == 0) { imprimeDato("lblAnotaciones",'No cuenta con observaciones') }
+                            if (itemAnotacion == 0) { imprimeDato("observaciones", null) }
 
                         }, error: function (xhr, status, error) {
-                            imprimeDato("lblAnotaciones", "error")
+                            imprimeDato("observaciones", "error")
                         }
                     });
 
 
+                }
+                else{
+                    imprimeDato("ingresos", null);
                 }
             }
 
